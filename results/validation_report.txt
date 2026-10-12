@@ -1,0 +1,52 @@
+========================================================================
+         FGM THERMAL BUCKLING FEA - VALIDATION & ANALYSIS REPORT        
+========================================================================
+
+ANALYSIS METRICS:
+  Total Parametric Cases Solved: 126
+  Plate Discretization:          8x8 Serendipity Q8 Elements (1445 DOFs)
+  Boundary Conditions:           SSSS (Simply Supported all 4 edges)
+  Thermal Fields Studied:        UTD, LTD, NTD
+  Porosity Models:               None (Solid), Even, Uneven, SCE
+  Slenderness Ratio Range (a/h): 10 to 120
+  Power-Law Index Range (n):     0 to 10
+  Porosity Fraction Range (e0):  0.0 to 0.6
+
+EXTREMA & INTEGRITY:
+  Minimum DeltaT_cr:             -632.3972 deg C (a/h=100, n=0.0, e0=0.5, even, UTD)
+  Maximum DeltaT_cr:             2747.4351 deg C (a/h=10, n=0.0, e0=0.2, even, UTD)
+  Failed Cases:                  0
+  Physical Notes (Section N):    8 cases with e0 >= 0.5 exhibit DeltaT_cr < 0.
+                                 Caused by U_alpha(z) > alpha_c producing negative
+                                 effective expansion, inducing buckling under cooling.
+                                 Strictly preserved per Section N.
+
+MESH CONVERGENCE STUDY (Baseline Case: a/h=100, n=1, e0=0.2, Even, UTD):
+  Mesh  4x 4 | DOFs:  405 | DeltaT_cr =   9.7856 deg C | Relative Diff = 1.9578%
+  Mesh  6x 6 | DOFs:  845 | DeltaT_cr =   9.6066 deg C | Relative Diff = 0.0928%
+  Mesh  8x 8 | DOFs: 1445 | DeltaT_cr =   9.5989 deg C | Relative Diff = 0.0134%
+  Mesh 10x10 | DOFs: 2205 | DeltaT_cr =   9.5979 deg C | Relative Diff = 0.0027%
+  Mesh 12x12 | DOFs: 3125 | DeltaT_cr =   9.5977 deg C | Relative Diff = 0.0000%
+  -> Convergence Criterion Met: Relative difference (8x8 vs 12x12) is 0.0134% (< 0.1%)
+
+FORMAL VALIDATION CHECKS (Section M):
+  [1] Mesh convergence verified:                   PASSED (0.0134%)
+  [2] Mesh density stability verified:             PASSED
+  [3] Eigenvalues lambda_cr positive and physical: PASSED
+  [4] UTD field constant through thickness:        PASSED
+  [5] LTD field strictly linear:                   PASSED
+  [6] NTD nonlinear conduction series:             PASSED
+  [7] Thermal resultants consistent:               PASSED (UTD: 1.79e+04, LTD: 9.73e+03, NTD: 6.97e+03)
+  [8] Solid plate reproduction at e0=0:            PASSED
+  [9] Symmetry of porosity models:                 PASSED (Error < 1e-12)
+  [10] Representative verification table:          PASSED
+
+FIGURES GENERATED (PNG 600 dpi, PDF, FIG):
+  - Figure1_DeltaTcr_vs_ah
+  - Figure2_DeltaTcr_vs_n
+  - Figure3_DeltaTcr_vs_e0
+  - Figure4_DeltaTcr_vs_ah_different_n
+  - Figure5_DeltaTcr_vs_e0_different_n
+  - Figure6_DeltaTcr_vs_ah_different_e0
+  - Figure7_Thermal_Distributions
+  - Figure8_Comparative_Configurations

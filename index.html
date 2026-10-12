@@ -1,0 +1,2486 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Interactive FGM FSDT Thermal-Buckling Model Explorer and validated FEA simulation engine following Javaheri and Eslami (2002).">
+  <title>FGM Plate Thermal-Buckling Model Explorer · Javaheri &amp; Eslami (2002)</title>
+  <style>
+
+:root {
+  --bg-app: #090d16;
+  --bg-card: #131b2e;
+  --bg-card-subtle: #1a243b;
+  --bg-hover: #1e293b;
+  --border: #243049;
+  --border-focus: #38bdf8;
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  --accent: #38bdf8;
+  --accent-gradient: linear-gradient(135deg, #38bdf8 0%, #818cf8 100%);
+  --accent-dim: rgba(56, 189, 248, 0.12);
+  --ceramic: #f59e0b;
+  --metal: #94a3b8;
+  --danger: #f43f5e;
+  --danger-bg: rgba(244, 63, 94, 0.12);
+  --warning: #fbbf24;
+  --warning-bg: rgba(251, 191, 36, 0.12);
+  --success: #10b981;
+  --success-bg: rgba(16, 185, 129, 0.12);
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.4);
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --chart-bg: #1a243b;
+  --chart-axis: #cbd5e1;
+  --chart-grid: #34415a;
+  --chart-text: #f8fafc;
+  --chart-muted: #cbd5e1;
+}
+
+[data-theme="light"] {
+  --bg-app: #f8fafc;
+  --bg-card: #ffffff;
+  --bg-card-subtle: #f1f5f9;
+  --bg-hover: #e2e8f0;
+  --border: #e2e8f0;
+  --border-focus: #0284c7;
+  --text-main: #0f172a;
+  --text-muted: #64748b;
+  --accent: #0284c7;
+  --accent-gradient: linear-gradient(135deg, #0284c7 0%, #6366f1 100%);
+  --accent-dim: rgba(2, 132, 199, 0.08);
+  --ceramic: #d97706;
+  --metal: #64748b;
+  --danger: #e11d48;
+  --danger-bg: #ffe4e6;
+  --warning: #d97706;
+  --warning-bg: #fef3c7;
+  --success: #059669;
+  --success-bg: #d1fae5;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.08);
+  --chart-bg: #ffffff;
+  --chart-axis: #222222;
+  --chart-grid: #d9d9d9;
+  --chart-text: #222222;
+  --chart-muted: #555555;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background-color: var(--bg-app);
+  color: var(--text-main);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.5;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* Accessibility */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  background: var(--accent);
+  color: #fff;
+  padding: 8px;
+  z-index: 100;
+  transition: top 0.2s;
+}
+.skip-link:focus { top: 0; }
+
+/* Layout */
+.app-container {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 1.25rem;
+  width: 100%;
+  flex: 1;
+}
+
+/* Header */
+header.app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.brand-section h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  background: var(--accent-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.brand-section p {
+  color: var(--text-muted);
+  font-size: 0.875rem;
+  margin-top: 0.2rem;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.875rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background-color: var(--bg-card);
+  color: var(--text-main);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.btn:hover {
+  background-color: var(--bg-hover);
+  border-color: var(--border-focus);
+}
+
+.btn-primary {
+  background: var(--accent-gradient);
+  color: #ffffff;
+  border: none;
+}
+.btn-primary:hover {
+  opacity: 0.95;
+  transform: translateY(-1px);
+}
+
+.btn-active {
+  background-color: var(--accent-dim);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* Sticky Controls Bar */
+.controls-bar {
+  position: sticky;
+  top: 0.5rem;
+  z-index: 50;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+  box-shadow: var(--shadow-md);
+  backdrop-filter: blur(8px);
+}
+
+.controls-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+  align-items: end;
+}
+
+.control-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.control-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  display: flex;
+  justify-content: space-between;
+}
+
+.control-label span.val-badge {
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-weight: 700;
+}
+
+.slider-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+input[type="range"] {
+  flex: 1;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--border);
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+input[type="number"], select {
+  background-color: var(--bg-card-subtle);
+  border: 1px solid var(--border);
+  color: var(--text-main);
+  padding: 0.4rem 0.6rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.8125rem;
+  font-family: var(--font-mono);
+  width: 100%;
+}
+input[type="number"]:focus, select:focus {
+  border-color: var(--border-focus);
+}
+
+/* Key Metrics Readout Banner */
+.metrics-banner {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.75rem;
+  margin-top: 1rem;
+  padding-top: 0.875rem;
+  border-top: 1px solid var(--border);
+}
+
+.metric-card {
+  background-color: var(--bg-card-subtle);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 0.625rem 0.875rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.metric-title {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.metric-value {
+  font-size: 1.25rem;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  color: var(--accent);
+  margin-top: 0.15rem;
+  display: flex;
+  align-items: baseline;
+  gap: 0.35rem;
+}
+
+.metric-sub {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-family: var(--font-sans);
+}
+
+/* Alert Banner */
+.alert-banner {
+  background-color: var(--danger-bg);
+  border: 1px solid var(--danger);
+  color: var(--danger);
+  border-radius: var(--radius-sm);
+  padding: 0.75rem 1rem;
+  margin-bottom: 1.25rem;
+  display: none;
+  align-items: center;
+  gap: 0.75rem;
+  font-weight: 500;
+  animation: shake 0.3s ease-in-out;
+}
+.alert-banner.visible { display: flex; }
+
+/* Panels Grid Layout */
+.panels-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+@media (max-width: 1024px) {
+  .panels-grid { grid-template-columns: 1fr; }
+}
+
+.panel-card {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+}
+
+.panel-card.full-width {
+  grid-column: 1 / -1;
+}
+
+.panel-header {
+  padding: 0.875rem 1.125rem;
+  background-color: var(--bg-card-subtle);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+}
+
+.panel-title {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  font-size: 0.9375rem;
+  font-weight: 600;
+}
+
+.panel-num {
+  background-color: var(--accent-dim);
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  padding: 0.15rem 0.45rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(56, 189, 248, 0.25);
+}
+
+.panel-body {
+  padding: 1.125rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* Audit Tag Badge */
+.audit-tag {
+  display: none;
+  background-color: #8b5cf6;
+  color: #ffffff;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  padding: 0.15rem 0.45rem;
+  border-radius: 4px;
+  letter-spacing: 0.03em;
+  margin-left: 0.5rem;
+}
+body.audit-mode .audit-tag { display: inline-block; }
+
+/* SVG and Canvas containers */
+.canvas-wrapper {
+  position: relative;
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-card-subtle);
+  overflow: visible;
+}
+
+svg.chart-svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.parametric-chart-wrapper {
+  background: var(--chart-bg);
+  height: auto !important;
+  min-height: 0;
+  aspect-ratio: 1000 / 430;
+}
+
+[data-theme="dark"] .parametric-chart-wrapper {
+  background: var(--chart-bg);
+}
+
+.parametric-chart-wrapper .chart-svg {
+  width: 100%;
+  height: auto;
+  min-height: 0;
+}
+
+.geometry-chart-wrapper {
+  height: auto !important;
+  min-height: 0;
+  aspect-ratio: 500 / 240;
+}
+
+.geometry-chart-wrapper .chart-svg {
+  width: 100%;
+  height: auto;
+  min-height: 0;
+}
+
+/* Let viewBox-driven diagrams grow with their panel instead of clipping at
+   the old 240px dashboard height. */
+.canvas-wrapper:has(> svg:not(#svg-mesh)) {
+  height: auto !important;
+  min-height: 0;
+  aspect-ratio: 500 / 240;
+}
+
+.canvas-wrapper:has(> #svg-mesh) {
+  height: auto !important;
+  min-height: 0;
+  aspect-ratio: 300 / 240;
+}
+
+.canvas-wrapper:has(> svg) > svg {
+  width: 100%;
+  height: auto;
+  min-height: 0;
+}
+
+.canvas-wrapper:has(> #canvas-mode3d) {
+  height: 260px !important;
+}
+
+.canvas-wrapper:has(> #canvas-sparsity) {
+  height: auto !important;
+  min-height: 220px;
+}
+
+@media (max-width: 700px) {
+  .parametric-chart-wrapper {
+    aspect-ratio: 1 / 0.62;
+  }
+
+  #p7-heading + div {
+    flex-wrap: wrap;
+  }
+
+  #p7-heading + div .btn {
+    flex: 1 1 auto;
+  }
+}
+
+canvas.render-canvas {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  display: block;
+  cursor: grab;
+}
+canvas.render-canvas:active { cursor: grabbing; }
+
+/* Table styling */
+.data-table-wrapper {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+
+table.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8125rem;
+  font-family: var(--font-mono);
+  text-align: left;
+}
+
+table.data-table th, table.data-table td {
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid var(--border);
+}
+
+table.data-table th {
+  background-color: var(--bg-card-subtle);
+  color: var(--text-muted);
+  font-weight: 600;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+}
+
+table.data-table tr:hover td {
+  background-color: var(--bg-hover);
+}
+
+table.data-table tr.highlighted td {
+  background-color: var(--accent-dim);
+  font-weight: 700;
+  color: var(--accent);
+}
+
+/* Flowchart architecture */
+.flowchart-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.pipeline-diagram {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: center;
+  align-items: center;
+  padding: 1rem;
+  background: var(--bg-card-subtle);
+  border-radius: var(--radius-sm);
+}
+
+.pipeline-node {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 0.625rem 0.875rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  min-width: 130px;
+  text-align: center;
+}
+.pipeline-node:hover {
+  border-color: var(--accent);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
+}
+.pipeline-node .node-fn {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 0.8125rem;
+  color: var(--accent);
+}
+.pipeline-node .node-eq {
+  font-size: 0.6875rem;
+  color: var(--text-muted);
+  margin-top: 0.15rem;
+}
+
+.pipeline-arrow {
+  color: var(--text-muted);
+  font-size: 1.25rem;
+}
+
+/* Modal */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  padding: 1rem;
+  backdrop-filter: blur(4px);
+}
+.modal-backdrop.active { display: flex; }
+
+.modal-content {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  max-width: 640px;
+  width: 100%;
+  padding: 1.5rem;
+  box-shadow: var(--shadow-md);
+  position: relative;
+}
+
+.modal-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 1.25rem;
+  cursor: pointer;
+}
+.modal-close:hover { color: var(--text-main); }
+
+/* Footer Quality Gate */
+footer.app-footer {
+  margin-top: auto;
+  background-color: var(--bg-card);
+  border-top: 1px solid var(--border);
+  padding: 1rem 1.25rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  font-size: 0.8125rem;
+}
+
+.footer-status-pills {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.65rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+.status-pill.pass {
+  background-color: var(--success-bg);
+  color: var(--success);
+  border: 1px solid var(--success);
+}
+.status-pill.info {
+  background-color: var(--accent-dim);
+  color: var(--accent);
+  border: 1px solid var(--accent);
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-4px); }
+  75% { transform: translateX(4px); }
+}
+
+  </style>
+</head>
+<body>
+
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+  <div class="app-container">
+    <header class="app-header" role="banner">
+      <div class="brand-section">
+        <h1>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+            <polyline points="2 17 12 22 22 17"></polyline>
+            <polyline points="2 12 12 17 22 12"></polyline>
+          </svg>
+          FGM Plate Thermal-Buckling Model Explorer
+        </h1>
+        <p>Interactive FSDT Closed-Form & Q8 Serendipity FEM Solver · Javaheri &amp; Eslami (2002) Formulation</p>
+      </div>
+      <div class="header-actions">
+        <button id="btn-theme-toggle" class="btn" aria-label="Toggle light and dark color theme">
+          <span id="theme-icon">🌙</span> <span id="theme-text">Dark Mode</span>
+        </button>
+        <button id="btn-audit-toggle" class="btn" aria-label="Toggle equation audit badges">
+          <span>🏷️</span> <span id="audit-text">Audit Mode: OFF</span>
+        </button>
+        <button id="btn-reset-baseline" class="btn" aria-label="Reset parameters to Javaheri Table 2 Baseline">
+          <span>🔄</span> Reset Baseline
+        </button>
+      </div>
+    </header>
+
+    <!-- Global Parameter Controls Bar -->
+    <section class="controls-bar" aria-label="Model Parameters Configuration">
+      <div class="controls-grid">
+        <!-- k index -->
+        <div class="control-group">
+          <label class="control-label" for="slider-k">
+            <span>Power-Law Index (k)</span>
+            <span class="val-badge" id="badge-k">1.0</span>
+          </label>
+          <div class="slider-wrapper">
+            <input type="range" id="slider-k" min="0" max="10" step="0.1" value="1.0" aria-label="FGM power-law index k">
+            <input type="number" id="num-k" min="0" max="20" step="0.1" value="1.0" style="width: 65px;" aria-label="Numeric input for k">
+          </div>
+        </div>
+
+        <!-- a/h ratio -->
+        <div class="control-group">
+          <label class="control-label" for="slider-ah">
+            <span>Side-to-Thickness (a/h)</span>
+            <span class="val-badge" id="badge-ah">100</span>
+          </label>
+          <div class="slider-wrapper">
+            <input type="range" id="slider-ah" min="5" max="200" step="1" value="100" aria-label="Plate aspect ratio a/h">
+            <input type="number" id="num-ah" min="5" max="200" step="1" value="100" style="width: 65px;" aria-label="Numeric input for a/h">
+          </div>
+        </div>
+
+        <!-- Porosity Type -->
+        <div class="control-group">
+          <label class="control-label" for="select-porosity">
+            <span>Porosity Distribution</span>
+          </label>
+          <select id="select-porosity" aria-label="Porosity distribution type">
+            <option value="none" selected>None (Perfect FGM)</option>
+            <option value="even">Even Distribution</option>
+            <option value="uneven">Uneven Distribution</option>
+            <option value="sce">Sinusoidal (SCE)</option>
+          </select>
+        </div>
+
+        <!-- Porosity Fraction e0 -->
+        <div class="control-group">
+          <label class="control-label" for="slider-e0">
+            <span>Porosity Fraction (e₀)</span>
+            <span class="val-badge" id="badge-e0">0.00</span>
+          </label>
+          <div class="slider-wrapper">
+            <input type="range" id="slider-e0" min="0" max="0.5" step="0.01" value="0.0" aria-label="Porosity volume fraction e0">
+            <input type="number" id="num-e0" min="0" max="0.7" step="0.01" value="0.0" style="width: 65px;" aria-label="Numeric input for e0">
+          </div>
+        </div>
+
+        <!-- Thermal Load Case -->
+        <div class="control-group">
+          <label class="control-label" for="select-loadcase">
+            <span>Thermal Distribution</span>
+          </label>
+          <select id="select-loadcase" aria-label="Thermal distribution profile">
+            <option value="UTD" selected>UTD (Uniform Rise)</option>
+            <option value="LTD">LTD (Linear Gradient)</option>
+            <option value="NTD">NTD (Nonlinear Conduction)</option>
+          </select>
+        </div>
+
+        <!-- Reference Temp Tm -->
+        <div class="control-group">
+          <label class="control-label" for="num-tm">
+            <span>Bottom Metal Temp (Tₘ)</span>
+            <span class="val-badge">°C</span>
+          </label>
+          <input type="number" id="num-tm" min="0" max="100" step="0.5" value="0.0" aria-label="Reference metal surface temperature Tm">
+        </div>
+
+        <!-- Mesh Grid N -->
+        <div class="control-group">
+          <label class="control-label" for="select-mesh">
+            <span>Q8 Mesh Resolution</span>
+          </label>
+          <select id="select-mesh" aria-label="FEM Q8 serendipity mesh grid size">
+            <option value="4">4 × 4 (65 Nodes)</option>
+            <option value="8" selected>8 × 8 (225 Nodes - Paper)</option>
+            <option value="12">12 × 12 (481 Nodes)</option>
+            <option value="16">16 × 16 (833 Nodes)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Quick Preset Buttons -->
+      <div style="display: flex; gap: 0.5rem; margin-top: 0.75rem; flex-wrap: wrap;">
+        <span style="font-size: 0.75rem; color: var(--text-muted); align-self: center;">Benchmarks:</span>
+        <button class="btn btn-preset" data-k="1" data-ah="100" data-tc="UTD" data-tm="0" data-p="none" data-e0="0">Table 2: a/h=100 (UTD)</button>
+        <button class="btn btn-preset" data-k="1" data-ah="20" data-tc="UTD" data-tm="0" data-p="none" data-e0="0">Table 2: a/h=20 (UTD)</button>
+        <button class="btn btn-preset" data-k="1" data-ah="10" data-tc="UTD" data-tm="0" data-p="none" data-e0="0">Table 2: a/h=10 (UTD)</button>
+        <button class="btn btn-preset" data-k="1" data-ah="20" data-tc="LTD" data-tm="5" data-p="none" data-e0="0">Table 4: a/h=20 (LTD)</button>
+        <button class="btn btn-preset" data-k="1" data-ah="10" data-tc="NTD" data-tm="5" data-p="none" data-e0="0">Table 6: a/h=10 (NTD)</button>
+        <button class="btn btn-preset" data-k="1" data-ah="40" data-tc="UTD" data-tm="0" data-p="even" data-e0="0.2">Porous: e0=0.2 (Even)</button>
+      </div>
+
+      <!-- Key Readouts Banner -->
+      <div class="metrics-banner" role="region" aria-label="Key Computation Results">
+        <div class="metric-card">
+          <span class="metric-title">Critical Buckling Rise (ΔT_cr)</span>
+          <span class="metric-value" id="val-dtcr">---</span>
+          <span class="metric-sub" id="sub-mode">Mode (m=1, n=1)</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-title">Paper Benchmark (Javaheri 2002)</span>
+          <span class="metric-value" id="val-jav">---</span>
+          <span class="metric-sub" id="sub-jav">HSDT analytical</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-title">FEA Q8 Reference (MATLAB R2023a)</span>
+          <span class="metric-value" id="val-fem">---</span>
+          <span class="metric-sub" id="sub-fem">8x8 Q8 elements</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-title">Thermal Prestress (N₀)</span>
+          <span class="metric-value" id="val-n0">---</span>
+          <span class="metric-sub">Compres. membrane resultant</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Safety Warning Alert Banner -->
+    <div id="alert-property-warning" class="alert-banner" role="alert" aria-live="assertive">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+        <line x1="12" y1="9" x2="12" y2="13"></line>
+        <line x1="12" y1="17" x2="12.01" y2="17"></line>
+      </svg>
+      <div>
+        <strong>Physical Integrity Violation:</strong>
+        <span id="alert-warning-text">Young's modulus E(z) or thermal expansion alpha(z) has fallen below zero! Additive porosity causes E <= 0 when e0 >= 0.311 for even porosity.</span>
+      </div>
+    </div>
+
+    <!-- Main Content Panels -->
+    <main id="main-content" class="panels-grid" role="main">
+      
+      <!-- Panel 1: Geometry & Boundary Conditions -->
+      <section class="panel-card" aria-labelledby="p1-heading">
+        <div class="panel-header">
+          <h2 class="panel-title" id="p1-heading">
+            <span class="panel-num">1</span>
+            Geometry &amp; Boundary Conditions
+            <span class="audit-tag">Eq. 19 · get_SSSS_BCs.m</span>
+          </h2>
+        </div>
+        <div class="panel-body">
+          <div class="canvas-wrapper geometry-chart-wrapper">
+            <svg id="svg-geometry" class="chart-svg" viewBox="0 0 500 240" preserveAspectRatio="xMidYMid meet" aria-label="3D isometric view of plate geometry, thickness, boundary constraints and thermal prestress arrows" role="img"></svg>
+          </div>
+          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; font-size: 0.75rem;">
+            <div style="background: var(--bg-card-subtle); padding: 0.5rem; border-radius: var(--radius-sm);">
+              <div style="color: var(--text-muted);">Plate Size</div>
+              <div style="font-weight: 700; font-family: var(--font-mono);">a = 1.0 m, b = 1.0 m</div>
+            </div>
+            <div style="background: var(--bg-card-subtle); padding: 0.5rem; border-radius: var(--radius-sm);">
+              <div style="color: var(--text-muted);">Thickness (h)</div>
+              <div style="font-weight: 700; font-family: var(--font-mono);" id="lbl-h-mm">10.00 mm</div>
+            </div>
+            <div style="background: var(--bg-card-subtle); padding: 0.5rem; border-radius: var(--radius-sm);">
+              <div style="color: var(--text-muted);">Edges Restrained</div>
+              <div style="font-weight: 700; font-family: var(--font-mono); color: var(--accent);">SSSS (FSDT)</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Panel 2: Materials & Porosity -->
+      <section class="panel-card" aria-labelledby="p2-heading">
+        <div class="panel-header">
+          <h2 class="panel-title" id="p2-heading">
+            <span class="panel-num">2</span>
+            Material Gradation &amp; Porosity Penalty
+            <span class="audit-tag">Eq. 1, 3 · get_effective_properties.m</span>
+          </h2>
+        </div>
+        <div class="panel-body">
+          <div class="canvas-wrapper" style="height: 240px;">
+            <svg id="svg-materials" class="chart-svg" viewBox="0 0 500 240" preserveAspectRatio="xMidYMid meet" aria-label="Through-thickness material properties E(z), alpha(z), Vc(z) and porosity reduction curves" role="img"></svg>
+          </div>
+          <div style="display: flex; align-items: center; justify-content: space-between; font-size: 0.75rem;">
+            <div><span style="display:inline-block;width:12px;height:3px;background:var(--accent);margin-right:4px;"></span> E(z) Actual</div>
+            <div><span style="display:inline-block;width:12px;height:3px;background:var(--ceramic);margin-right:4px;"></span> α(z) Actual</div>
+            <div><span style="display:inline-block;width:12px;height:3px;border-top:2px dashed var(--text-muted);margin-right:4px;"></span> Baseline (No pores)</div>
+            <div id="lbl-pore-status" style="font-family: var(--font-mono); font-weight: 700;">Safe</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Panel 3: Thermal Distribution -->
+      <section class="panel-card" aria-labelledby="p3-heading">
+        <div class="panel-header">
+          <h2 class="panel-title" id="p3-heading">
+            <span class="panel-num">3</span>
+            Through-Thickness Thermal Field
+            <span class="audit-tag">Eq. 27, 33-35 · compute_thermal_resultants.m</span>
+          </h2>
+        </div>
+        <div class="panel-body">
+          <div class="canvas-wrapper" style="height: 240px;">
+            <svg id="svg-thermal" class="chart-svg" viewBox="0 0 500 240" preserveAspectRatio="xMidYMid meet" aria-label="Thermal distribution profile g(eta) and thermal resultant integrand" role="img"></svg>
+          </div>
+          <div style="background: var(--bg-card-subtle); padding: 0.5rem 0.75rem; border-radius: var(--radius-sm); font-size: 0.75rem; display: flex; justify-content: space-between; align-items: center;">
+            <div><strong>Series Error vs Exact Conduction:</strong> <span id="lbl-conduction-err" style="font-family: var(--font-mono); color: var(--accent);">0.00%</span></div>
+            <div style="color: var(--text-muted); font-size: 0.7rem;">6-term paper polynomial expansion</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Panel 4: FSDT Kinematics -->
+      <section class="panel-card" aria-labelledby="p4-heading">
+        <div class="panel-header">
+          <h2 class="panel-title" id="p4-heading">
+            <span class="panel-num">4</span>
+            FSDT Kinematics &amp; Laminate Rigidity
+            <span class="audit-tag">Eq. 13F · compute_ABD_MS.m</span>
+          </h2>
+        </div>
+        <div class="panel-body">
+          <div class="canvas-wrapper" style="height: 240px;">
+            <svg id="svg-fsdt" class="chart-svg" viewBox="0 0 500 240" preserveAspectRatio="xMidYMid meet" aria-label="FSDT cross section deformation, mid-surface normal rotation, and neutral axis offset diagram" role="img"></svg>
+          </div>
+          <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.5rem; font-size: 0.75rem; font-family: var(--font-mono); text-align: center;">
+            <div style="background: var(--bg-card-subtle); padding: 0.4rem; border-radius: var(--radius-sm);">
+              <div style="color: var(--text-muted); font-size: 0.65rem;">A11 (MN/m)</div>
+              <div id="lbl-a11" style="font-weight: 700;">---</div>
+            </div>
+            <div style="background: var(--bg-card-subtle); padding: 0.4rem; border-radius: var(--radius-sm);">
+              <div style="color: var(--text-muted); font-size: 0.65rem;">B11 (kN)</div>
+              <div id="lbl-b11" style="font-weight: 700; color: var(--warning);">---</div>
+            </div>
+            <div style="background: var(--bg-card-subtle); padding: 0.4rem; border-radius: var(--radius-sm);">
+              <div style="color: var(--text-muted); font-size: 0.65rem;">D11 (N·m)</div>
+              <div id="lbl-d11" style="font-weight: 700;">---</div>
+            </div>
+            <div style="background: var(--bg-card-subtle); padding: 0.4rem; border-radius: var(--radius-sm);">
+              <div style="color: var(--text-muted); font-size: 0.65rem;">z_na (mm)</div>
+              <div id="lbl-zna" style="font-weight: 700; color: var(--accent);">---</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Panel 5: Q8 FEM View -->
+      <section class="panel-card" aria-labelledby="p5-heading">
+        <div class="panel-header">
+          <h2 class="panel-title" id="p5-heading">
+            <span class="panel-num">5</span>
+            FEM Q8 Serendipity Mesh &amp; Sparsity
+            <span class="audit-tag">generate_mesh.m · assemble_global.m</span>
+          </h2>
+        </div>
+        <div class="panel-body">
+          <div style="display: grid; grid-template-columns: 3fr 2fr; gap: 0.75rem;">
+            <div class="canvas-wrapper" style="height: 240px;">
+              <svg id="svg-mesh" class="chart-svg" viewBox="0 0 300 240" preserveAspectRatio="xMidYMid meet" aria-label="Q8 serendipity element mesh with boundary condition nodes and Gauss integration points" role="img"></svg>
+            </div>
+            <div class="canvas-wrapper" style="height: 240px; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+              <canvas id="canvas-sparsity" width="200" height="200" style="width: 190px; height: 190px;" aria-label="Global stiffness matrix sparsity spy diagram"></canvas>
+              <span style="font-size: 0.65rem; color: var(--text-muted); margin-top: 4px;">K Global Sparsity Pattern</span>
+            </div>
+          </div>
+          <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-muted);">
+            <div>Total Nodes: <strong id="lbl-total-nodes" style="color: var(--text-main);">225</strong></div>
+            <div>Total DOFs: <strong id="lbl-total-dofs" style="color: var(--text-main);">1125</strong></div>
+            <div>Free DOFs: <strong id="lbl-free-dofs" style="color: var(--accent);">1005</strong></div>
+            <div>Integration: <strong>3x3 / 2x2 Shear</strong></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Panel 6: Modes & 3D Surface -->
+      <section class="panel-card" aria-labelledby="p6-heading">
+        <div class="panel-header">
+          <h2 class="panel-title" id="p6-heading">
+            <span class="panel-num">6</span>
+            Buckling Modes &amp; 3D Surface Shape
+            <span class="audit-tag">Eq. 24 · eigs solver</span>
+          </h2>
+        </div>
+        <div class="panel-body">
+          <div class="canvas-wrapper" style="height: 240px;">
+            <canvas id="canvas-mode3d" class="render-canvas" aria-label="Interactive 3D isometric surface plot of buckling mode shape w(x,y). Click and drag to orbit."></canvas>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem;">
+            <div style="color: var(--text-muted);">Drag mouse to rotate 3D view · Selected Mode <span id="lbl-selected-mode">(1,1)</span></div>
+            <div style="font-family: var(--font-mono);">Shear Ratio: <strong id="lbl-shear-ratio" style="color: var(--accent);">0.0005</strong></div>
+          </div>
+          <div class="data-table-wrapper" style="max-height: 120px;">
+            <table class="data-table" id="tbl-modes" aria-label="Buckling eigenvalue table for modes m,n from 1 to 4">
+              <thead>
+                <tr>
+                  <th>Mode (m, n)</th>
+                  <th>Wave α (rad/m)</th>
+                  <th>Wave β (rad/m)</th>
+                  <th>λ_cr</th>
+                  <th>ΔT_cr (°C)</th>
+                </tr>
+              </thead>
+              <tbody id="tbl-modes-body">
+                <!-- Injected via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- Panel 7: Parametric Sweeps & Benchmarks -->
+      <section class="panel-card full-width" aria-labelledby="p7-heading">
+        <div class="panel-header">
+          <h2 class="panel-title" id="p7-heading">
+            <span class="panel-num">7</span>
+            Parametric Studies &amp; Benchmark Validation Overlay
+            <span class="audit-tag">Tables 2, 4, 6, 8 · fgm_viz_reference.json</span>
+          </h2>
+          <div style="display: flex; gap: 0.5rem;">
+            <button class="btn btn-sm btn-active" id="tab-study-ah">ΔT vs a/h</button>
+            <button class="btn btn-sm" id="tab-study-k">ΔT vs k</button>
+            <button class="btn btn-sm" id="tab-study-e0">ΔT vs e₀</button>
+            <button class="btn btn-sm" id="btn-toggle-log">Log Scale: OFF</button>
+          </div>
+        </div>
+        <div class="panel-body">
+          <div class="canvas-wrapper parametric-chart-wrapper">
+            <svg id="svg-parametric" class="chart-svg" viewBox="0 0 1000 430" preserveAspectRatio="xMidYMid meet" aria-label="Parametric sweep curves overlaid with Javaheri paper benchmarks and MATLAB FEA data points" role="img"></svg>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem; font-size: 0.75rem;">
+            <div style="display: flex; gap: 1rem; align-items: center;">
+              <div><span style="display:inline-block;width:16px;height:3px;background:#0072BD;margin-right:4px;"></span> <strong>FSDT Closed-Form</strong></div>
+              <div><span style="display:inline-block;width:10px;height:10px;background:#D95319;margin-right:4px;"></span> <strong>Javaheri HSDT</strong></div>
+              <div><span style="display:inline-block;width:10px;height:10px;border:2px solid #EDB120;margin-right:4px;"></span> <strong>Javaheri CPT</strong></div>
+              <div><span style="display:inline-block;width:10px;height:10px;background:#77AC30;border-radius:50%;margin-right:4px;"></span> <strong>FEA Reference (MATLAB)</strong></div>
+            </div>
+            <div id="lbl-param-stats" style="font-family: var(--font-mono); color: var(--accent);">Active: Uniform Rise (UTD, k=1) · Error vs HSDT: <0.02%</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Panel 8: Simulation Pipeline -->
+      <section class="panel-card full-width" aria-labelledby="p8-heading">
+        <div class="panel-header">
+          <h2 class="panel-title" id="p8-heading">
+            <span class="panel-num">8</span>
+            FEA Code Architecture &amp; Mathematical Execution Pipeline
+            <span class="audit-tag">main.m -> run_thermal_buckling_case.m</span>
+          </h2>
+        </div>
+        <div class="panel-body">
+          <div class="flowchart-container">
+            <div class="pipeline-diagram">
+              <div class="pipeline-node" data-fn="main" tabindex="0" role="button" aria-label="Inspect main.m">
+                <div class="node-fn">main.m</div>
+                <div class="node-eq">User Inputs &amp; Sweep</div>
+              </div>
+              <div class="pipeline-arrow">➔</div>
+              <div class="pipeline-node" data-fn="run_case" tabindex="0" role="button" aria-label="Inspect run_thermal_buckling_case.m">
+                <div class="node-fn">run_case.m</div>
+                <div class="node-eq">Eq. 18-40 Orchestration</div>
+              </div>
+              <div class="pipeline-arrow">➔</div>
+              <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                <div class="pipeline-node" data-fn="properties" tabindex="0" role="button" aria-label="Inspect get_effective_properties.m">
+                  <div class="node-fn">properties.m</div>
+                  <div class="node-eq">Eq. 1, 3 (Mixtures)</div>
+                </div>
+                <div class="pipeline-node" data-fn="thermal" tabindex="0" role="button" aria-label="Inspect compute_thermal_resultants.m">
+                  <div class="node-fn">thermal.m</div>
+                  <div class="node-eq">Eq. 5, 6, 34, 35 (Φ₁)</div>
+                </div>
+              </div>
+              <div class="pipeline-arrow">➔</div>
+              <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                <div class="pipeline-node" data-fn="assemble_k" tabindex="0" role="button" aria-label="Inspect assemble_global.m">
+                  <div class="node-fn">assemble_K.m</div>
+                  <div class="node-eq">Eq. 13F (K Global)</div>
+                </div>
+                <div class="pipeline-node" data-fn="assemble_kg" tabindex="0" role="button" aria-label="Inspect assemble_thermal_geometric.m">
+                  <div class="node-fn">assemble_Kg.m</div>
+                  <div class="node-eq">N₀·∫GᵀG dA</div>
+                </div>
+              </div>
+              <div class="pipeline-arrow">➔</div>
+              <div class="pipeline-node" data-fn="bcs" tabindex="0" role="button" aria-label="Inspect get_SSSS_BCs.m">
+                <div class="node-fn">get_SSSS_BCs.m</div>
+                <div class="node-eq">Condensation [K_red]</div>
+              </div>
+              <div class="pipeline-arrow">➔</div>
+              <div class="pipeline-node" data-fn="eigs" tabindex="0" role="button" aria-label="Inspect eigs solver">
+                <div class="node-fn">eigs(K, KgT)</div>
+                <div class="node-eq">Eq. 24 (λ_cr)</div>
+              </div>
+              <div class="pipeline-arrow">➔</div>
+              <div class="pipeline-node" data-fn="tm_shift" tabindex="0" role="button" aria-label="Inspect reference temperature shift">
+                <div class="node-fn">ΔT_cr Shift</div>
+                <div class="node-eq">Eq. 37-40 (T_m shift)</div>
+              </div>
+            </div>
+            <div style="text-align: center; font-size: 0.75rem; color: var(--text-muted);">
+              💡 Click any block above to inspect its exact mathematical formula, equation number in Javaheri (2002), and role in physics.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Panel 9: Audit Mode & Traceability Matrix -->
+      <section class="panel-card full-width" aria-labelledby="p9-heading">
+        <div class="panel-header">
+          <h2 class="panel-title" id="p9-heading">
+            <span class="panel-num">9</span>
+            Equation Traceability &amp; Verification Matrix
+            <span class="audit-tag">Javaheri (2002) Traceability</span>
+          </h2>
+          <div style="display: flex; gap: 0.5rem;">
+            <select id="select-traceability-filter" style="width: auto; padding: 0.2rem 0.5rem; font-size: 0.75rem;" aria-label="Filter traceability matrix by topic">
+              <option value="all">All Modules</option>
+              <option value="materials">Materials &amp; Porosity</option>
+              <option value="thermal">Thermal Fields</option>
+              <option value="fsdt">FSDT Kinematics</option>
+              <option value="fem">FEA Discretization</option>
+              <option value="solver">Eigenvalue Solver</option>
+            </select>
+          </div>
+        </div>
+        <div class="panel-body">
+          <div class="data-table-wrapper">
+            <table class="data-table" id="tbl-traceability" aria-label="Traceability matrix mapping Javaheri 2002 paper equations to code implementations">
+              <thead>
+                <tr>
+                  <th>Paper Equation</th>
+                  <th>Description &amp; Formula</th>
+                  <th>FSDT Formulation</th>
+                  <th>Code Implementation</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="tbl-traceability-body">
+                <!-- Injected via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Footer Quality Gate -->
+    <footer class="app-footer" role="contentinfo">
+      <div class="footer-status-pills">
+        <div class="status-pill pass" id="pill-selftest">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+          <span>Self-Test: PASSED (10/20/100 -> 758.37 / 196.26 / 7.940)</span>
+        </div>
+        <div class="status-pill info" id="pill-fem">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 14 14"></polyline>
+          </svg>
+          <span id="txt-fem-status">FEM Cross-Check: RUN (MATLAB R2023a: 48 cases validated)</span>
+        </div>
+      </div>
+      <div style="color: var(--text-muted); font-size: 0.75rem;">
+        Self-Contained Scientific Explorer · Zero CDNs · Javaheri &amp; Eslami (2002)
+      </div>
+    </footer>
+  </div>
+
+  <!-- Formula Inspector Modal -->
+  <div id="inspector-modal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal-content">
+      <button class="modal-close" id="btn-modal-close" aria-label="Close formula details dialog">✕</button>
+      <h3 id="modal-title" style="font-size: 1.125rem; font-weight: 700; color: var(--accent); margin-bottom: 0.5rem;">Pipeline Function</h3>
+      <div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 1rem;" id="modal-file">Source: run_thermal_buckling_case.m</div>
+      <div style="background: var(--bg-card-subtle); padding: 1rem; border-radius: var(--radius-sm); border: 1px solid var(--border); font-family: var(--font-mono); font-size: 0.8125rem; margin-bottom: 1rem; overflow-x: auto;" id="modal-formula">
+        Formula content
+      </div>
+      <div style="font-size: 0.8125rem; line-height: 1.6;" id="modal-desc">
+        Description
+      </div>
+    </div>
+  </div>
+
+  <script>
+    window.__EMBEDDED_DATA__ = {"fem_ref": {"meta": {"date": "2026-10-04 16:34:07", "solver": "Q8 Serendipity FEM", "mesh": 8, "description": "Reference thermal buckling temperatures for Javaheri & Eslami (2002) benchmark"}, "lookup": {"k0_ah10_UTD": 1618.759068096523, "k0_ah10_LTD": 3227.518136193046, "k0_ah10_NTD": 3227.518136193046, "k0_ah20_UTD": 421.57155286356317, "k0_ah20_LTD": 833.1431057271263, "k0_ah20_NTD": 833.1431057271263, "k0_ah40_UTD": 106.50419175540215, "k0_ah40_LTD": 203.0083835108043, "k0_ah40_NTD": 203.0083835108043, "k0_ah100_UTD": 17.09181526465371, "k0_ah100_LTD": 24.183630529307507, "k0_ah100_NTD": 24.183630529307507, "k1_ah10_UTD": 758.4364934983478, "k1_ah10_LTD": 1413.0446959643637, "k1_ah10_NTD": 1961.4360201579047, "k1_ah20_UTD": 196.28229986988873, "k1_ah20_LTD": 358.7434927766796, "k1_ah20_NTD": 497.96896781754816, "k1_ah40_UTD": 49.50648788025725, "k1_ah40_LTD": 83.47041479659585, "k1_ah40_NTD": 115.8646139553486, "k1_ah100_UTD": 7.941167189354452, "k1_ah100_LTD": 5.5160597246421155, "k1_ah100_NTD": 7.656798305216615, "k5_ah10_UTD": 686.8360007299642, "k5_ah10_LTD": 1173.6074030744664, "k5_ah10_NTD": 1466.8093492346677, "k5_ah20_UTD": 179.06468458881338, "k5_ah20_LTD": 299.60812017633276, "k5_ah20_NTD": 374.45911693297734, "k5_ah40_UTD": 45.25103107665162, "k5_ah40_LTD": 69.28192116926239, "k5_ah40_NTD": 86.59060043230272, "k5_ah100_UTD": 7.262471769353267, "k5_ah100_LTD": 3.8942701982841665, "k5_ah100_NTD": 4.867174423342236, "k10_ah10_UTD": 698.9825894635629, "k10_ah10_LTD": 1225.9924681398184, "k10_ah10_NTD": 1416.6188071417916, "k10_ah20_UTD": 183.1753576176135, "k10_ah20_LTD": 314.76531221938103, "k10_ah20_NTD": 363.7073413692294, "k10_ah40_UTD": 46.353076518902824, "k10_ah40_LTD": 73.0545133499295, "k10_ah40_NTD": 84.41356716907536, "k10_ah100_UTD": 7.442196120515825, "k10_ah100_LTD": 4.314393610057412, "k10_ah100_NTD": 4.985227306243724}, "cases": [{"k": 0, "ah": 10, "load_case": "UTD", "Tm": 0, "DeltaT_cr_fem": 1618.759068096523}, {"k": 0, "ah": 10, "load_case": "LTD", "Tm": 5, "DeltaT_cr_fem": 3227.518136193046}, {"k": 0, "ah": 10, "load_case": "NTD", "Tm": 5, "DeltaT_cr_fem": 3227.518136193046}, {"k": 0, "ah": 20, "load_case": "UTD", "Tm": 0, "DeltaT_cr_fem": 421.57155286356317}, {"k": 0, "ah": 20, "load_case": "LTD", "Tm": 5, "DeltaT_cr_fem": 833.1431057271263}, {"k": 0, "ah": 20, "load_case": "NTD", "Tm": 5, "DeltaT_cr_fem": 833.1431057271263}, {"k": 0, "ah": 40, "load_case": "UTD", "Tm": 0, "DeltaT_cr_fem": 106.50419175540215}, {"k": 0, "ah": 40, "load_case": "LTD", "Tm": 5, "DeltaT_cr_fem": 203.0083835108043}, {"k": 0, "ah": 40, "load_case": "NTD", "Tm": 5, "DeltaT_cr_fem": 203.0083835108043}, {"k": 0, "ah": 100, "load_case": "UTD", "Tm": 0, "DeltaT_cr_fem": 17.09181526465371}, {"k": 0, "ah": 100, "load_case": "LTD", "Tm": 5, "DeltaT_cr_fem": 24.183630529307507}, {"k": 0, "ah": 100, "load_case": "NTD", "Tm": 5, "DeltaT_cr_fem": 24.183630529307507}, {"k": 1, "ah": 10, "load_case": "UTD", "Tm": 0, "DeltaT_cr_fem": 758.4364934983478}, {"k": 1, "ah": 10, "load_case": "LTD", "Tm": 5, "DeltaT_cr_fem": 1413.0446959643637}, {"k": 1, "ah": 10, "load_case": "NTD", "Tm": 5, "DeltaT_cr_fem": 1961.4360201579047}, {"k": 1, "ah": 20, "load_case": "UTD", "Tm": 0, "DeltaT_cr_fem": 196.28229986988873}, {"k": 1, "ah": 20, "load_case": "LTD", "Tm": 5, "DeltaT_cr_fem": 358.7434927766796}, {"k": 1, "ah": 20, "load_case": "NTD", "Tm": 5, "DeltaT_cr_fem": 497.96896781754816}, {"k": 1, "ah": 40, "load_case": "UTD", "Tm": 0, "DeltaT_cr_fem": 49.50648788025725}, {"k": 1, "ah": 40, "load_case": "LTD", "Tm": 5, "DeltaT_cr_fem": 83.47041479659585}, {"k": 1, "ah": 40, "load_case": "NTD", "Tm": 5, "DeltaT_cr_fem": 115.8646139553486}, {"k": 1, "ah": 100, "load_case": "UTD", "Tm": 0, "DeltaT_cr_fem": 7.941167189354452}, {"k": 1, "ah": 100, "load_case": "LTD", "Tm": 5, "DeltaT_cr_fem": 5.5160597246421155}, {"k": 1, "ah": 100, "load_case": "NTD", "Tm": 5, "DeltaT_cr_fem": 7.656798305216615}, {"k": 5, "ah": 10, "load_case": "UTD", "Tm": 0, "DeltaT_cr_fem": 686.8360007299642}, {"k": 5, "ah": 10, "load_case": "LTD", "Tm": 5, "DeltaT_cr_fem": 1173.6074030744664}, {"k": 5, "ah": 10, "load_case": "NTD", "Tm": 5, "DeltaT_cr_fem": 1466.8093492346677}, {"k": 5, "ah": 20, "load_case": "UTD", "Tm": 0, "DeltaT_cr_fem": 179.06468458881338}, {"k": 5, "ah": 20, "load_case": "LTD", "Tm": 5, "DeltaT_cr_fem": 299.60812017633276}, {"k": 5, "ah": 20, "load_case": "NTD", "Tm": 5, "DeltaT_cr_fem": 374.45911693297734}, {"k": 5, "ah": 40, "load_case": "UTD", "Tm": 0, "DeltaT_cr_fem": 45.25103107665162}, {"k": 5, "ah": 40, "load_case": "LTD", "Tm": 5, "DeltaT_cr_fem": 69.28192116926239}, {"k": 5, "ah": 40, "load_case": "NTD", "Tm": 5, "DeltaT_cr_fem": 86.59060043230272}, {"k": 5, "ah": 100, "load_case": "UTD", "Tm": 0, "DeltaT_cr_fem": 7.262471769353267}, {"k": 5, "ah": 100, "load_case": "LTD", "Tm": 5, "DeltaT_cr_fem": 3.8942701982841665}, {"k": 5, "ah": 100, "load_case": "NTD", "Tm": 5, "DeltaT_cr_fem": 4.867174423342236}, {"k": 10, "ah": 10, "load_case": "UTD", "Tm": 0, "DeltaT_cr_fem": 698.9825894635629}, {"k": 10, "ah": 10, "load_case": "LTD", "Tm": 5, "DeltaT_cr_fem": 1225.9924681398184}, {"k": 10, "ah": 10, "load_case": "NTD", "Tm": 5, "DeltaT_cr_fem": 1416.6188071417916}, {"k": 10, "ah": 20, "load_case": "UTD", "Tm": 0, "DeltaT_cr_fem": 183.1753576176135}, {"k": 10, "ah": 20, "load_case": "LTD", "Tm": 5, "DeltaT_cr_fem": 314.76531221938103}, {"k": 10, "ah": 20, "load_case": "NTD", "Tm": 5, "DeltaT_cr_fem": 363.7073413692294}, {"k": 10, "ah": 40, "load_case": "UTD", "Tm": 0, "DeltaT_cr_fem": 46.353076518902824}, {"k": 10, "ah": 40, "load_case": "LTD", "Tm": 5, "DeltaT_cr_fem": 73.0545133499295}, {"k": 10, "ah": 40, "load_case": "NTD", "Tm": 5, "DeltaT_cr_fem": 84.41356716907536}, {"k": 10, "ah": 100, "load_case": "UTD", "Tm": 0, "DeltaT_cr_fem": 7.442196120515825}, {"k": 10, "ah": 100, "load_case": "LTD", "Tm": 5, "DeltaT_cr_fem": 4.314393610057412}, {"k": 10, "ah": 100, "load_case": "NTD", "Tm": 5, "DeltaT_cr_fem": 4.985227306243724}]}, "csv_rows": [{"a_over_h": "10", "n": "0", "e0": "0.2", "porosity_type": "even", "thermal_distribution": "UTD", "k": "0", "lambda_cr": "2747.43511557704", "DeltaT_cr": "2747.43511557704", "mesh": "8", "mode_number": "1"}, {"a_over_h": "10", "n": "1", "e0": "0", "porosity_type": "even", "thermal_distribution": "UTD", "k": "1", "lambda_cr": "758.436493498348", "DeltaT_cr": "758.436493498348", "mesh": "8", "mode_number": "1"}, {"a_over_h": "10", "n": "1", "e0": "0.2", "porosity_type": "even", "thermal_distribution": "LTD", "k": "1", "lambda_cr": "1690.53704712791", "DeltaT_cr": "1681.3605886303", "mesh": "8", "mode_number": "1"}, {"a_over_h": "10", "n": "1", "e0": "0.2", "porosity_type": "even", "thermal_distribution": "NTD", "k": "1", "lambda_cr": "2361.40462163699", "DeltaT_cr": "2348.58660528926", "mesh": "8", "mode_number": "1"}, {"a_over_h": "10", "n": "1", "e0": "0.2", "porosity_type": "even", "thermal_distribution": "UTD", "k": "1", "lambda_cr": "921.127168812892", "DeltaT_cr": "921.127168812892", "mesh": "8", "mode_number": "1"}, {"a_over_h": "10", "n": "1", "e0": "0.4", "porosity_type": "even", "thermal_distribution": "UTD", "k": "1", "lambda_cr": "1120.8944046207", "DeltaT_cr": "1120.8944046207", "mesh": "8", "mode_number": "1"}, {"a_over_h": "10", "n": "1", "e0": "0.6", "porosity_type": "even", "thermal_distribution": "UTD", "k": "1", "lambda_cr": "89.3282523989352", "DeltaT_cr": "89.3282523989352", "mesh": "8", "mode_number": "1"}, {"a_over_h": "10", "n": "10", "e0": "0.2", "porosity_type": "even", "thermal_distribution": "UTD", "k": "10", "lambda_cr": "814.654667418819", "DeltaT_cr": "814.654667418819", "mesh": "8", "mode_number": "1"}, {"a_over_h": "10", "n": "5", "e0": "0.2", "porosity_type": "even", "thermal_distribution": "UTD", "k": "5", "lambda_cr": "712.130044745145", "DeltaT_cr": "712.130044745145", "mesh": "8", "mode_number": "1"}, {"a_over_h": "100", "n": "0", "e0": "0", "porosity_type": "even", "thermal_distribution": "UTD", "k": "0", "lambda_cr": "17.0918152646537", "DeltaT_cr": "17.0918152646537", "mesh": "8", "mode_number": "1"}, {"a_over_h": "100", "n": "0", "e0": "0.1", "porosity_type": "even", "thermal_distribution": "UTD", "k": "0", "lambda_cr": "21.5101076462707", "DeltaT_cr": "21.5101076462707", "mesh": "8", "mode_number": "1"}, {"a_over_h": "100", "n": "0", "e0": "0.2", "porosity_type": "even", "thermal_distribution": "LTD", "k": "0", "lambda_cr": "58.0180885128185", "DeltaT_cr": "48.0180885128185", "mesh": "8", "mode_number": "1"}, {"a_over_h": "100", "n": "0", "e0": "0.2", "porosity_type": "even", "thermal_distribution": "NTD", "k": "0", "lambda_cr": "58.0180885128185", "DeltaT_cr": "48.0180885128185", "mesh": "8", "mode_number": "1"}, {"a_over_h": "100", "n": "0", "e0": "0.2", "porosity_type": "even", "thermal_distribution": "UTD", "k": "0", "lambda_cr": "29.0090442564093", "DeltaT_cr": "29.0090442564093", "mesh": "8", "mode_number": "1"}, {"a_over_h": "100", "n": "0", "e0": "0.3", "porosity_type": "even", "thermal_distribution": "UTD", "k": "0", "lambda_cr": "44.5350116052632", "DeltaT_cr": "44.5350116052632", "mesh": "8", "mode_number": "1"}, {"a_over_h": "100", "n": "0", "e0": "0.4", "porosity_type": "even", "thermal_distribution": "UTD", "k": "0", "lambda_cr": "95.8177522401146", "DeltaT_cr": "95.8177522401146", "mesh": "8", "mode_number": "1"}, {"a_over_h": "100", "n": "0", "e0": "0.5", "porosity_type": "even", "thermal_distribution": "UTD", "k": "0", "lambda_cr": "-632.397164794199", "DeltaT_cr": "-632.397164794199", "mesh": "8", "mode_number": "1"}, {"a_over_h": "100", "n": "0", "e0": "0.6", "porosity_type": "even", "thermal_distribution": "UTD", "k": "0", "lambda_cr": "-73.5345540457835", "DeltaT_cr": "-73.5345540457835", "mesh": "8", "mode_number": "1"}, {"a_over_h": "100", "n": "0.5", "e0": "0.2", "porosity_type": "even", "thermal_distribution": "LTD", "k": "0.5", "lambda_cr": "26.2689221346644", "DeltaT_cr": "16.0763149478881", "mesh": "8", "mode_number": "1"}, {"a_over_h": "100", "n": "0.5", "e0": "0.2", "porosity_type": "even", "thermal_distribution": "NTD", "k": "0.5", "lambda_cr": "35.026965884881", "DeltaT_cr": "21.4361492393022", "mesh": "8", "mode_number": "1"}, {"a_over_h": "100", "n": "0.5", "e0": "0.2", "porosity_type": "even", "thermal_distribution": "UTD", "k": "0.5", "lambda_cr": "12.8862623925825", "DeltaT_cr": "12.8862623925825", "mesh": "8", "mode_number": "1"}, {"a_over_h": "100", "n": "1", "e0": "0", "porosity_type": "even", "thermal_distribution": "LTD", "k": "1", "lambda_cr": "14.8933908478224", "DeltaT_cr": "5.51605972464212", "mesh": "8", "mode_number": "1"}, {"a_over_h": "100", "n": "1", "e0": "0", "porosity_type": "even", "thermal_distribution": "NTD", "k": "1", "lambda_cr": "20.6733964995156", "DeltaT_cr": "7.65679830521661", "mesh": "8", "mode_number": "1"}, {"a_over_h": "100", "n": "1", "e0": "0", "porosity_type": "even", "thermal_distribution": "UTD", "k": "1", "lambda_cr": "7.94116718935445", "DeltaT_cr": "7.94116718935445", "mesh": "8", "mode_number": "1"}, {"a_over_h": "100", "n": "1", "e0": "0", "porosity_type": "none", "thermal_distribution": "LTD", "k": "1", "lambda_cr": "14.8933908478224", "DeltaT_cr": "5.51605972464212", "mesh": "8", "mode_number": "1"}, {"a_over_h": "100", "n": "1", "e0": "0", "porosity_type": "none", "thermal_distribution": "NTD", "k": "1", "lambda_cr": "20.6733964995156", "DeltaT_cr": "7.65679830521661", "mesh": "8", "mode_number": "1"}, {"a_over_h": "100", "n": "1", "e0": "0", "porosity_type": "none", "thermal_distribution": "UTD", "k": "1", "lambda_cr": "7.94116718935445", "DeltaT_cr": "7.94116718935445", "mesh": "8", "mode_number": "1"}, {"a_over_h": "100", "n": "1", "e0": "0.1", "porosity_type": "even", "thermal_distribution": "LTD", "k": "1", "lambda_cr": "16.1826727942022", "DeltaT_cr": "6.89042549281375", "mesh": "8", "mode_number": "1"}, {"a_over_h": "100", "n": "1", "e0": "0.1", "porosity_type": "even", "thermal_distribution": "NTD", "k": "1", "lambda_cr": "22.5170442344395", "DeltaT_cr": "9.5875395609175", "mesh": "8", "mode_number": "1"}, {"a_over_h": "100", "n": "1", "e0": "0.1", "porosity_type": "even", "thermal_distribution": "UTD", "k": "1", "lambda_cr": "8.70762059452731", "DeltaT_cr": "8.70762059452731", "mesh": "8", "mode_number": "1"}, {"a_over_h": "100", "n": "1", "e0": "0.2", "porosity_type": "even", "thermal_distribution": "LTD", "k": "1", "lambda_cr": "17.6168702869538", "DeltaT_cr": "8.44041178933605", "mesh": "8", "mode_number": "1"}, {"a_over_h": "100", "n": "1", "e0": "0.2", "porosity_type": "even", "thermal_distribution": "NTD", "k": "1", "lambda_cr": "24.6078954525532", "DeltaT_cr": "11.7898791048198", "mesh": "8", "mode_number": "1"}, {"a_over_h": "100", "n": "1", "e0": "0.2", "porosity_type": "even", "thermal_distribution": "UTD", "k": "1", "lambda_cr": "9.59894838053655", "DeltaT_cr": "9.59894838053655", "mesh": "8", "mode_number": "1"}, {"a_over_h": "100", "n": "1", "e0": "0.2", "porosity_type": "sce", "thermal_distribution": "LTD", "k": "1", "lambda_cr": "17.9820395765774", "DeltaT_cr": "8.68993965996527", "mesh": "8", "mode_number": "1"}, {"a_over_h": "100", "n": "1", "e0": "0.2", "porosity_type": "sce", "thermal_distribution": "NTD", "k": "1", "lambda_cr": "24.3941545759648", "DeltaT_cr": "11.7886366792964", "mesh": "8", "mode_number": "1"}, {"a_over_h": "100", "n": "1", "e0": "0.2", "porosity_type": "sce", "thermal_distribution": "UTD", "k": "1", "lambda_cr": "9.67598268311218", "DeltaT_cr": "9.67598268311218", "mesh": "8", "mode_number": "1"}, {"a_over_h": "100", "n": "1", "e0": "0.2", "porosity_type": "uneven", "thermal_distribution": "LTD", "k": "1", "lambda_cr": "17.3476467348375", "DeltaT_cr": "8.0977481772936", "mesh": "8", "mode_number": "1"}, {"a_over_h": "100", "n": "1", "e0": "0.2", "porosity_type": "uneven", "thermal_distribution": "NTD", "k": "1", "lambda_cr": "23.5276141335822", "DeltaT_cr": "10.9825094653144", "mesh": "8", "mode_number": "1"}, {"a_over_h": "100", "n": "1", "e0": "0.2", "porosity_type": "uneven", "thermal_distribution": "UTD", "k": "1", "lambda_cr": "9.37720918068311", "DeltaT_cr": "9.37720918068311", "mesh": "8", "mode_number": "1"}, {"a_over_h": "100", "n": "1", "e0": "0.3", "porosity_type": "even", "thermal_distribution": "LTD", "k": "1", "lambda_cr": "19.0968476248486", "DeltaT_cr": "10.0892752626182", "mesh": "8", "mode_number": "1"}, {"a_over_h": "100", "n": "1", "e0": "0.3", "porosity_type": "even", "thermal_distribution": "NTD", "k": "1", "lambda_cr": "26.8544540843495", "DeltaT_cr": "14.1877855762853", "mesh": "8", "mode_number": "1"}, {"a_over_h": "100", "n": "1", "e0": "0.3", "porosity_type": "even", "thermal_distribution": "UTD", "k": "1", "lambda_cr": "10.6004408606937", "DeltaT_cr": "10.6004408606937", "mesh": "8", "mode_number": "1"}, {"a_over_h": "100", "n": "1", "e0": "0.4", "porosity_type": "even", "thermal_distribution": "LTD", "k": "1", "lambda_cr": "20.1910219947057", "DeltaT_cr": "11.4584197169447", "mesh": "8", "mode_number": "1"}, {"a_over_h": "100", "n": "1", "e0": "0.4", "porosity_type": "even", "thermal_distribution": "NTD", "k": "1", "lambda_cr": "28.761514308621", "DeltaT_cr": "16.3221803596422", "mesh": "8", "mode_number": "1"}, {"a_over_h": "100", "n": "1", "e0": "0.4", "porosity_type": "even", "thermal_distribution": "UTD", "k": "1", "lambda_cr": "11.5607131485453", "DeltaT_cr": "11.5607131485453", "mesh": "8", "mode_number": "1"}, {"a_over_h": "100", "n": "1", "e0": "0.5", "porosity_type": "even", "thermal_distribution": "LTD", "k": "1", "lambda_cr": "18.9355360426592", "DeltaT_cr": "10.7496018436363", "mesh": "8", "mode_number": "1"}, {"a_over_h": "100", "n": "1", "e0": "0.5", "porosity_type": "even", "thermal_distribution": "NTD", "k": "1", "lambda_cr": "27.8041747598813", "DeltaT_cr": "15.7842802858213", "mesh": "8", "mode_number": "1"}, {"a_over_h": "100", "n": "1", "e0": "0.5", "porosity_type": "even", "thermal_distribution": "UTD", "k": "1", "lambda_cr": "11.5658980284249", "DeltaT_cr": "11.5658980284249", "mesh": "8", "mode_number": "1"}, {"a_over_h": "100", "n": "1", "e0": "0.6", "porosity_type": "even", "thermal_distribution": "LTD", "k": "1", "lambda_cr": "1.15410542236499", "DeltaT_cr": "-5.27382920001073", "mesh": "8", "mode_number": "1"}, {"a_over_h": "100", "n": "1", "e0": "0.6", "porosity_type": "even", "thermal_distribution": "NTD", "k": "1", "lambda_cr": "1.90935426729725", "DeltaT_cr": "-8.72503334002435", "mesh": "8", "mode_number": "1"}, {"a_over_h": "100", "n": "1", "e0": "0.6", "porosity_type": "even", "thermal_distribution": "UTD", "k": "1", "lambda_cr": "0.89772647838352", "DeltaT_cr": "0.89772647838352", "mesh": "8", "mode_number": "1"}, {"a_over_h": "100", "n": "10", "e0": "0", "porosity_type": "even", "thermal_distribution": "UTD", "k": "10", "lambda_cr": "7.44219612051582", "DeltaT_cr": "7.44219612051582", "mesh": "8", "mode_number": "1"}, {"a_over_h": "100", "n": "10", "e0": "0.1", "porosity_type": "even", "thermal_distribution": "UTD", "k": "10", "lambda_cr": "8.18576635636333", "DeltaT_cr": "8.18576635636333", "mesh": "8", "mode_number": "1"}, {"a_over_h": "100", "n": "10", "e0": "0.2", "porosity_type": "even", "thermal_distribution": "LTD", "k": "10", "lambda_cr": "13.2890939161858", "DeltaT_cr": "5.5746809778027", "mesh": "8", "mode_number": "1"}, {"a_over_h": "100", "n": "10", "e0": "0.2", "porosity_type": "even", "thermal_distribution": "NTD", "k": "10", "lambda_cr": "15.2083722695686", "DeltaT_cr": "6.37980468263853", "mesh": "8", "mode_number": "1"}, {"a_over_h": "100", "n": "10", "e0": "0.2", "porosity_type": "even", "thermal_distribution": "UTD", "k": "10", "lambda_cr": "8.61315956400634", "DeltaT_cr": "8.61315956400634", "mesh": "8", "mode_number": "1"}, {"a_over_h": "100", "n": "10", "e0": "0.3", "porosity_type": "even", "thermal_distribution": "UTD", "k": "10", "lambda_cr": "3.4650856426022", "DeltaT_cr": "3.4650856426022", "mesh": "8", "mode_number": "1"}, {"a_over_h": "100", "n": "10", "e0": "0.4", "porosity_type": "even", "thermal_distribution": "UTD", "k": "10", "lambda_cr": "353.631838478204", "DeltaT_cr": "353.631838478204", "mesh": "8", "mode_number": "1"}, {"a_over_h": "100", "n": "10", "e0": "0.5", "porosity_type": "even", "thermal_distribution": "UTD", "k": "10", "lambda_cr": "-44.1059126662343", "DeltaT_cr": "-44.1059126662343", "mesh": "8", "mode_number": "1"}, {"a_over_h": "100", "n": "10", "e0": "0.6", "porosity_type": "even", "thermal_distribution": "UTD", "k": "10", "lambda_cr": "-7.97289858835716", "DeltaT_cr": "-7.97289858835716", "mesh": "8", "mode_number": "1"}, {"a_over_h": "100", "n": "2", "e0": "0.2", "porosity_type": "even", "thermal_distribution": "LTD", "k": "2", "lambda_cr": "12.2690791389254", "DeltaT_cr": "4.06920606606747", "mesh": "8", "mode_number": "1"}, {"a_over_h": "100", "n": "2", "e0": "0.2", "porosity_type": "even", "thermal_distribution": "NTD", "k": "2", "lambda_cr": "16.7671359687071", "DeltaT_cr": "5.56104746100917", "mesh": "8", "mode_number": "1"}, {"a_over_h": "100", "n": "2", "e0": "0.2", "porosity_type": "even", "thermal_distribution": "UTD", "k": "2", "lambda_cr": "7.48126161826628", "DeltaT_cr": "7.48126161826628", "mesh": "8", "mode_number": "1"}, {"a_over_h": "100", "n": "5", "e0": "0", "porosity_type": "even", "thermal_distribution": "UTD", "k": "5", "lambda_cr": "7.26247176935327", "DeltaT_cr": "7.26247176935327", "mesh": "8", "mode_number": "1"}, {"a_over_h": "100", "n": "5", "e0": "0.1", "porosity_type": "even", "thermal_distribution": "UTD", "k": "5", "lambda_cr": "7.65765947872259", "DeltaT_cr": "7.65765947872259", "mesh": "8", "mode_number": "1"}, {"a_over_h": "100", "n": "5", "e0": "0.2", "porosity_type": "even", "thermal_distribution": "LTD", "k": "5", "lambda_cr": "11.299993233607", "DeltaT_cr": "3.70005309575028", "mesh": "8", "mode_number": "1"}, {"a_over_h": "100", "n": "5", "e0": "0.2", "porosity_type": "even", "thermal_distribution": "NTD", "k": "5", "lambda_cr": "13.9668539109976", "DeltaT_cr": "4.57328601733894", "mesh": "8", "mode_number": "1"}, {"a_over_h": "100", "n": "5", "e0": "0.2", "porosity_type": "even", "thermal_distribution": "UTD", "k": "5", "lambda_cr": "7.4342646314539", "DeltaT_cr": "7.4342646314539", "mesh": "8", "mode_number": "1"}, {"a_over_h": "100", "n": "5", "e0": "0.3", "porosity_type": "even", "thermal_distribution": "UTD", "k": "5", "lambda_cr": "3.58082869212559", "DeltaT_cr": "3.58082869212559", "mesh": "8", "mode_number": "1"}, {"a_over_h": "100", "n": "5", "e0": "0.4", "porosity_type": "even", "thermal_distribution": "UTD", "k": "5", "lambda_cr": "-34.6965022987234", "DeltaT_cr": "-34.6965022987234", "mesh": "8", "mode_number": "1"}, {"a_over_h": "100", "n": "5", "e0": "0.5", "porosity_type": "even", "thermal_distribution": "UTD", "k": "5", "lambda_cr": "275.852191931755", "DeltaT_cr": "275.852191931755", "mesh": "8", "mode_number": "1"}, {"a_over_h": "100", "n": "5", "e0": "0.6", "porosity_type": "even", "thermal_distribution": "UTD", "k": "5", "lambda_cr": "-92.9401357694847", "DeltaT_cr": "-92.9401357694847", "mesh": "8", "mode_number": "1"}, {"a_over_h": "120", "n": "0", "e0": "0.2", "porosity_type": "even", "thermal_distribution": "UTD", "k": "0", "lambda_cr": "20.1490801893943", "DeltaT_cr": "20.1490801893943", "mesh": "8", "mode_number": "1"}, {"a_over_h": "120", "n": "1", "e0": "0", "porosity_type": "even", "thermal_distribution": "UTD", "k": "1", "lambda_cr": "5.51564233018801", "DeltaT_cr": "5.51564233018801", "mesh": "8", "mode_number": "1"}, {"a_over_h": "120", "n": "1", "e0": "0.2", "porosity_type": "even", "thermal_distribution": "LTD", "k": "1", "lambda_cr": "12.235879435288", "DeltaT_cr": "3.05942093767024", "mesh": "8", "mode_number": "1"}, {"a_over_h": "120", "n": "1", "e0": "0.2", "porosity_type": "even", "thermal_distribution": "NTD", "k": "1", "lambda_cr": "17.0915285751178", "DeltaT_cr": "4.27351222738446", "mesh": "8", "mode_number": "1"}, {"a_over_h": "120", "n": "1", "e0": "0.2", "porosity_type": "even", "thermal_distribution": "UTD", "k": "1", "lambda_cr": "6.66699437395395", "DeltaT_cr": "6.66699437395395", "mesh": "8", "mode_number": "1"}, {"a_over_h": "120", "n": "1", "e0": "0.4", "porosity_type": "even", "thermal_distribution": "UTD", "k": "1", "lambda_cr": "8.02936121600514", "DeltaT_cr": "8.02936121600514", "mesh": "8", "mode_number": "1"}, {"a_over_h": "120", "n": "1", "e0": "0.6", "porosity_type": "even", "thermal_distribution": "UTD", "k": "1", "lambda_cr": "0.624619547144246", "DeltaT_cr": "0.624619547144246", "mesh": "8", "mode_number": "1"}, {"a_over_h": "120", "n": "10", "e0": "0.2", "porosity_type": "even", "thermal_distribution": "UTD", "k": "10", "lambda_cr": "5.98254487978526", "DeltaT_cr": "5.98254487978526", "mesh": "8", "mode_number": "1"}, {"a_over_h": "120", "n": "5", "e0": "0.2", "porosity_type": "even", "thermal_distribution": "UTD", "k": "5", "lambda_cr": "5.16352651663247", "DeltaT_cr": "5.16352651663247", "mesh": "8", "mode_number": "1"}, {"a_over_h": "20", "n": "0", "e0": "0.2", "porosity_type": "even", "thermal_distribution": "UTD", "k": "0", "lambda_cr": "715.511351190757", "DeltaT_cr": "715.511351190757", "mesh": "8", "mode_number": "1"}, {"a_over_h": "20", "n": "1", "e0": "0", "porosity_type": "even", "thermal_distribution": "UTD", "k": "1", "lambda_cr": "196.282299869889", "DeltaT_cr": "196.282299869889", "mesh": "8", "mode_number": "1"}, {"a_over_h": "20", "n": "1", "e0": "0.2", "porosity_type": "even", "thermal_distribution": "LTD", "k": "1", "lambda_cr": "435.953043344828", "DeltaT_cr": "426.77658484721", "mesh": "8", "mode_number": "1"}, {"a_over_h": "20", "n": "1", "e0": "0.2", "porosity_type": "even", "thermal_distribution": "NTD", "k": "1", "lambda_cr": "608.955321695053", "DeltaT_cr": "596.13730534732", "mesh": "8", "mode_number": "1"}, {"a_over_h": "20", "n": "1", "e0": "0.2", "porosity_type": "even", "thermal_distribution": "UTD", "k": "1", "lambda_cr": "237.538830180514", "DeltaT_cr": "237.538830180514", "mesh": "8", "mode_number": "1"}, {"a_over_h": "20", "n": "1", "e0": "0.4", "porosity_type": "even", "thermal_distribution": "UTD", "k": "1", "lambda_cr": "286.817439948923", "DeltaT_cr": "286.817439948923", "mesh": "8", "mode_number": "1"}, {"a_over_h": "20", "n": "1", "e0": "0.6", "porosity_type": "even", "thermal_distribution": "UTD", "k": "1", "lambda_cr": "22.3456918533138", "DeltaT_cr": "22.3456918533138", "mesh": "8", "mode_number": "1"}, {"a_over_h": "20", "n": "10", "e0": "0.2", "porosity_type": "even", "thermal_distribution": "UTD", "k": "10", "lambda_cr": "212.37269857341", "DeltaT_cr": "212.37269857341", "mesh": "8", "mode_number": "1"}, {"a_over_h": "20", "n": "5", "e0": "0.2", "porosity_type": "even", "thermal_distribution": "UTD", "k": "5", "lambda_cr": "183.889105350206", "DeltaT_cr": "183.889105350206", "mesh": "8", "mode_number": "1"}, {"a_over_h": "30", "n": "0", "e0": "0.2", "porosity_type": "even", "thermal_distribution": "UTD", "k": "0", "lambda_cr": "320.481485902028", "DeltaT_cr": "320.481485902028", "mesh": "8", "mode_number": "1"}, {"a_over_h": "30", "n": "1", "e0": "0", "porosity_type": "even", "thermal_distribution": "UTD", "k": "1", "lambda_cr": "87.8090996832779", "DeltaT_cr": "87.8090996832779", "mesh": "8", "mode_number": "1"}, {"a_over_h": "30", "n": "1", "e0": "0.2", "porosity_type": "even", "thermal_distribution": "LTD", "k": "1", "lambda_cr": "194.894856901288", "DeltaT_cr": "185.71839840367", "mesh": "8", "mode_number": "1"}, {"a_over_h": "30", "n": "1", "e0": "0.2", "porosity_type": "even", "thermal_distribution": "NTD", "k": "1", "lambda_cr": "272.236338506669", "DeltaT_cr": "259.418322158935", "mesh": "8", "mode_number": "1"}, {"a_over_h": "30", "n": "1", "e0": "0.2", "porosity_type": "even", "thermal_distribution": "UTD", "k": "1", "lambda_cr": "106.192850407312", "DeltaT_cr": "106.192850407312", "mesh": "8", "mode_number": "1"}, {"a_over_h": "30", "n": "1", "e0": "0.4", "porosity_type": "even", "thermal_distribution": "UTD", "k": "1", "lambda_cr": "128.032825017373", "DeltaT_cr": "128.032825017373", "mesh": "8", "mode_number": "1"}, {"a_over_h": "30", "n": "1", "e0": "0.6", "porosity_type": "even", "thermal_distribution": "UTD", "k": "1", "lambda_cr": "9.93447616246604", "DeltaT_cr": "9.93447616246604", "mesh": "8", "mode_number": "1"}, {"a_over_h": "30", "n": "10", "e0": "0.2", "porosity_type": "even", "thermal_distribution": "UTD", "k": "10", "lambda_cr": "95.1414802326679", "DeltaT_cr": "95.1414802326679", "mesh": "8", "mode_number": "1"}, {"a_over_h": "30", "n": "5", "e0": "0.2", "porosity_type": "even", "thermal_distribution": "UTD", "k": "5", "lambda_cr": "82.2296540728646", "DeltaT_cr": "82.2296540728646", "mesh": "8", "mode_number": "1"}, {"a_over_h": "40", "n": "0", "e0": "0.2", "porosity_type": "even", "thermal_distribution": "UTD", "k": "0", "lambda_cr": "180.763995181643", "DeltaT_cr": "180.763995181643", "mesh": "8", "mode_number": "1"}, {"a_over_h": "40", "n": "1", "e0": "0", "porosity_type": "even", "thermal_distribution": "UTD", "k": "1", "lambda_cr": "49.5064878802572", "DeltaT_cr": "49.5064878802572", "mesh": "8", "mode_number": "1"}, {"a_over_h": "40", "n": "1", "e0": "0.2", "porosity_type": "even", "thermal_distribution": "LTD", "k": "1", "lambda_cr": "109.854550577836", "DeltaT_cr": "100.678092080218", "mesh": "8", "mode_number": "1"}, {"a_over_h": "40", "n": "1", "e0": "0.2", "porosity_type": "even", "thermal_distribution": "NTD", "k": "1", "lambda_cr": "153.448895948819", "DeltaT_cr": "140.630879601086", "mesh": "8", "mode_number": "1"}, {"a_over_h": "40", "n": "1", "e0": "0.2", "porosity_type": "even", "thermal_distribution": "UTD", "k": "1", "lambda_cr": "59.8567250134436", "DeltaT_cr": "59.8567250134436", "mesh": "8", "mode_number": "1"}, {"a_over_h": "40", "n": "1", "e0": "0.4", "porosity_type": "even", "thermal_distribution": "UTD", "k": "1", "lambda_cr": "72.1293867848869", "DeltaT_cr": "72.1293867848869", "mesh": "8", "mode_number": "1"}, {"a_over_h": "40", "n": "1", "e0": "0.6", "porosity_type": "even", "thermal_distribution": "UTD", "k": "1", "lambda_cr": "5.59003073261541", "DeltaT_cr": "5.59003073261541", "mesh": "8", "mode_number": "1"}, {"a_over_h": "40", "n": "10", "e0": "0.2", "porosity_type": "even", "thermal_distribution": "UTD", "k": "10", "lambda_cr": "53.6671903115244", "DeltaT_cr": "53.6671903115244", "mesh": "8", "mode_number": "1"}, {"a_over_h": "40", "n": "5", "e0": "0.2", "porosity_type": "even", "thermal_distribution": "UTD", "k": "5", "lambda_cr": "46.3538188955698", "DeltaT_cr": "46.3538188955698", "mesh": "8", "mode_number": "1"}, {"a_over_h": "60", "n": "0", "e0": "0.2", "porosity_type": "even", "thermal_distribution": "UTD", "k": "0", "lambda_cr": "80.4974467974755", "DeltaT_cr": "80.4974467974755", "mesh": "8", "mode_number": "1"}, {"a_over_h": "60", "n": "1", "e0": "0", "porosity_type": "even", "thermal_distribution": "UTD", "k": "1", "lambda_cr": "22.03937048194", "DeltaT_cr": "22.03937048194", "mesh": "8", "mode_number": "1"}, {"a_over_h": "60", "n": "1", "e0": "0.2", "porosity_type": "even", "thermal_distribution": "LTD", "k": "1", "lambda_cr": "48.8967900452922", "DeltaT_cr": "39.7203315476744", "mesh": "8", "mode_number": "1"}, {"a_over_h": "60", "n": "1", "e0": "0.2", "porosity_type": "even", "thermal_distribution": "NTD", "k": "1", "lambda_cr": "68.3008433280607", "DeltaT_cr": "55.4828269803274", "mesh": "8", "mode_number": "1"}, {"a_over_h": "60", "n": "1", "e0": "0.2", "porosity_type": "even", "thermal_distribution": "UTD", "k": "1", "lambda_cr": "26.6425168587564", "DeltaT_cr": "26.6425168587564", "mesh": "8", "mode_number": "1"}, {"a_over_h": "60", "n": "1", "e0": "0.4", "porosity_type": "even", "thermal_distribution": "UTD", "k": "1", "lambda_cr": "32.0932380316463", "DeltaT_cr": "32.0932380316463", "mesh": "8", "mode_number": "1"}, {"a_over_h": "60", "n": "1", "e0": "0.6", "porosity_type": "even", "thermal_distribution": "UTD", "k": "1", "lambda_cr": "2.48669027893431", "DeltaT_cr": "2.48669027893431", "mesh": "8", "mode_number": "1"}, {"a_over_h": "60", "n": "10", "e0": "0.2", "porosity_type": "even", "thermal_distribution": "UTD", "k": "10", "lambda_cr": "23.9001408974742", "DeltaT_cr": "23.9001408974742", "mesh": "8", "mode_number": "1"}, {"a_over_h": "60", "n": "5", "e0": "0.2", "porosity_type": "even", "thermal_distribution": "UTD", "k": "5", "lambda_cr": "20.6336409017445", "DeltaT_cr": "20.6336409017445", "mesh": "8", "mode_number": "1"}, {"a_over_h": "80", "n": "0", "e0": "0.2", "porosity_type": "even", "thermal_distribution": "UTD", "k": "0", "lambda_cr": "45.3114537853884", "DeltaT_cr": "45.3114537853884", "mesh": "8", "mode_number": "1"}, {"a_over_h": "80", "n": "1", "e0": "0", "porosity_type": "even", "thermal_distribution": "UTD", "k": "1", "lambda_cr": "12.4044989070649", "DeltaT_cr": "12.4044989070649", "mesh": "8", "mode_number": "1"}, {"a_over_h": "80", "n": "1", "e0": "0.2", "porosity_type": "even", "thermal_distribution": "LTD", "k": "1", "lambda_cr": "27.5191363208186", "DeltaT_cr": "18.3426778232009", "mesh": "8", "mode_number": "1"}, {"a_over_h": "80", "n": "1", "e0": "0.2", "porosity_type": "even", "thermal_distribution": "NTD", "k": "1", "lambda_cr": "38.4397465893111", "DeltaT_cr": "25.6217302415777", "mesh": "8", "mode_number": "1"}, {"a_over_h": "80", "n": "1", "e0": "0.2", "porosity_type": "even", "thermal_distribution": "UTD", "k": "1", "lambda_cr": "14.9944209566049", "DeltaT_cr": "14.9944209566049", "mesh": "8", "mode_number": "1"}, {"a_over_h": "80", "n": "1", "e0": "0.4", "porosity_type": "even", "thermal_distribution": "UTD", "k": "1", "lambda_cr": "18.0598275400713", "DeltaT_cr": "18.0598275400713", "mesh": "8", "mode_number": "1"}, {"a_over_h": "80", "n": "1", "e0": "0.6", "porosity_type": "even", "thermal_distribution": "UTD", "k": "1", "lambda_cr": "1.40048852657508", "DeltaT_cr": "1.40048852657508", "mesh": "8", "mode_number": "1"}, {"a_over_h": "80", "n": "10", "e0": "0.2", "porosity_type": "even", "thermal_distribution": "UTD", "k": "10", "lambda_cr": "13.4534528069721", "DeltaT_cr": "13.4534528069721", "mesh": "8", "mode_number": "1"}, {"a_over_h": "80", "n": "5", "e0": "0.2", "porosity_type": "even", "thermal_distribution": "UTD", "k": "5", "lambda_cr": "11.6128789854327", "DeltaT_cr": "11.6128789854327", "mesh": "8", "mode_number": "1"}], "paper_benchmarks": {"table1": {"title": "Aspect Ratio Study b/a (k=1, b/h=100, UTD)", "ba": [1, 2, 3, 4, 5], "hsdt": [7.939, 19.835, 39.624, 67.25, 102.634], "cpt": [7.943, 19.859, 39.718, 67.522, 103.269]}, "table2": {"title": "Uniform Temperature Rise (UTD, k=1)", "ah": [10, 20, 40, 60, 80, 100], "hsdt": [757.891, 196.257, 49.5, 22.037, 12.402, 7.939], "cpt": [794.377, 198.594, 49.648, 22.066, 12.412, 7.943]}, "table4": {"title": "Linear Temperature Distribution (LTD, Tm=5 deg C, k=1)", "ah": [10, 20, 40, 60, 80, 100], "hsdt": [1412.023, 358.696, 83.459, 31.952, 13.882, 5.513], "cpt": [1480.45, 363.079, 83.736, 32.006, 13.901, 5.52]}, "table6": {"title": "Nonlinear Temperature Distribution (NTD, Tm=5 deg C, k=1)", "ah": [10, 20, 40, 60, 80, 100], "hsdt": [1960.018, 497.903, 115.849, 44.352, 19.27, 7.652], "cpt": [2055.001, 503.987, 116.234, 44.428, 19.296, 7.663]}, "k_study": {"title": "Power-Law Index k Study (a/h=100, Tm=5 deg C)", "k": [0, 1, 5, 10], "utd_hsdt": [17.088, 7.939, 7.26, 7.462], "ltd_hsdt": [24.177, 5.513, 3.891, 4.364], "ntd_hsdt": [24.177, 7.652, 4.866, 5.044]}}};
+// FGM Core Script
+
+(function() {
+  'use strict';
+
+  const DATA = window.__EMBEDDED_DATA__ || {};
+  const FEM_REF = DATA.fem_ref || { lookup: {}, cases: [] };
+  const CSV_ROWS = DATA.csv_rows || [];
+  const PAPER_BENCHMARKS = DATA.paper_benchmarks || {};
+
+  const Em = 70e9;
+  const Ec = 380e9;
+  const am = 23e-6;
+  const ac = 7.4e-6;
+  const Km = 204.0;
+  const Kc = 10.4;
+  const nu = 0.3;
+  const Ks = 5.0 / 6.0;
+  const a_plate = 1.0;
+  const b_plate = 1.0;
+
+  const gp = [-0.9739065285, -0.8650633667, -0.6794095683, -0.4333953941, -0.1488743390,
+               0.1488743390,  0.4333953941,  0.6794095683,  0.8650633667,  0.9739065285];
+  const gw = [0.0666713443,  0.1494513492,  0.2190863625,  0.2692667193,  0.2955242247,
+               0.2955242247,  0.2692667193,  0.2190863625,  0.1494513492,  0.0666713443];
+
+  const state = {
+    k: 1.0,
+    ah: 100,
+    porosity: 'none',
+    e0: 0.0,
+    loadCase: 'UTD',
+    Tm: 0.0,
+    meshN: 8,
+    theme: 'dark',
+    auditMode: false,
+    selectedMode: [1, 1],
+    paramTab: 'ah',
+    isLogScale: false,
+    rotX: 35,
+    rotY: 45
+  };
+
+  function det4(m) {
+    let d = 0;
+    for (let i = 0; i < 4; i++) {
+      let sub = [];
+      for (let r = 1; r < 4; r++) {
+        let row = [];
+        for (let c = 0; c < 4; c++) {
+          if (c !== i) row.push(m[r][c]);
+        }
+        sub.push(row);
+      }
+      let d3 = sub[0][0]*(sub[1][1]*sub[2][2] - sub[1][2]*sub[2][1])
+             - sub[0][1]*(sub[1][0]*sub[2][2] - sub[1][2]*sub[2][0])
+             + sub[0][2]*(sub[1][0]*sub[2][1] - sub[1][1]*sub[2][0]);
+      d += (i % 2 === 0 ? 1 : -1) * m[0][i] * d3;
+    }
+    return d;
+  }
+
+  function det5(m) {
+    let d = 0;
+    for (let i = 0; i < 5; i++) {
+      let sub = [];
+      for (let r = 1; r < 5; r++) {
+        let row = [];
+        for (let c = 0; c < 5; c++) {
+          if (c !== i) row.push(m[r][c]);
+        }
+        sub.push(row);
+      }
+      let d4 = det4(sub);
+      d += (i % 2 === 0 ? 1 : -1) * m[0][i] * d4;
+    }
+    return d;
+  }
+
+  function solve4x4(A, b) {
+    const n = 4;
+    let M = A.map((row, i) => [...row, b[i]]);
+    for (let i = 0; i < n; i++) {
+      let maxR = i;
+      for (let r = i + 1; r < n; r++) {
+        if (Math.abs(M[r][i]) > Math.abs(M[maxR][i])) maxR = r;
+      }
+      let tmp = M[i]; M[i] = M[maxR]; M[maxR] = tmp;
+      let pivot = M[i][i];
+      if (Math.abs(pivot) < 1e-14) continue;
+      for (let c = i; c <= n; c++) M[i][c] /= pivot;
+      for (let r = 0; r < n; r++) {
+        if (r !== i) {
+          let f = M[r][i];
+          for (let c = i; c <= n; c++) M[r][c] -= f * M[i][c];
+        }
+      }
+    }
+    return [M[0][n], M[1][n], M[2][n], M[3][n]];
+  }
+
+  function getPorosityPenalty(z, h, type, e0, Pc, Pm, k) {
+    if (type === 'even') {
+      return 0.5 * e0 * (Pc + Pm);
+    } else if (type === 'uneven') {
+      return 0.5 * e0 * (Pc + Pm) * (1.0 - 2.0 * Math.abs(z) / h);
+    } else if (type === 'sce') {
+      let Vc = Math.pow(z / h + 0.5, k);
+      return e0 * Math.cos(Math.PI * z / h) * (Pm + (Pc - Pm) * Vc);
+    }
+    return 0.0;
+  }
+
+  function getMaterialProps(z, h, k, type, e0) {
+    let eta = z / h + 0.5;
+    let Vc = Math.pow(Math.max(0, Math.min(1, eta)), k);
+    let U_E = getPorosityPenalty(z, h, type, e0, Ec, Em, k);
+    let U_a = getPorosityPenalty(z, h, type, e0, ac, am, k);
+    let E = Em + (Ec - Em) * Vc - U_E;
+    let alpha = am + (ac - am) * Vc - U_a;
+    return { E, alpha, Vc, U_E, U_a };
+  }
+
+  function getThermalG(eta, k, loadCase) {
+    if (loadCase === 'UTD') return 1.0;
+    if (loadCase === 'LTD') return eta;
+    if (loadCase === 'NTD') {
+      if (k === 0) return eta;
+      let r = (Kc - Km) / Km;
+      let C = 1.0 - r / (k + 1) + (r * r) / (2 * k + 1) - Math.pow(r, 3) / (3 * k + 1) + Math.pow(r, 4) / (4 * k + 1) - Math.pow(r, 5) / (5 * k + 1);
+      let poly = eta - (r / (k + 1)) * Math.pow(eta, k + 1)
+                     + ((r * r) / (2 * k + 1)) * Math.pow(eta, 2 * k + 1)
+                     - (Math.pow(r, 3) / (3 * k + 1)) * Math.pow(eta, 3 * k + 1)
+                     + (Math.pow(r, 4) / (4 * k + 1)) * Math.pow(eta, 4 * k + 1)
+                     - (Math.pow(r, 5) / (5 * k + 1)) * Math.pow(eta, 5 * k + 1);
+      return poly / C;
+    }
+    return 1.0;
+  }
+
+  function computeABD_MS(h, k, type, e0) {
+    let E1 = 0, E2 = 0, E3 = 0, S0 = 0;
+    for (let i = 0; i < 10; i++) {
+      let zi = (h / 2.0) * gp[i];
+      let wi = (h / 2.0) * gw[i];
+      let p = getMaterialProps(zi, h, k, type, e0);
+      E1 += wi * p.E;
+      E2 += wi * p.E * zi;
+      E3 += wi * p.E * zi * zi;
+      S0 += wi * (5.0 / 6.0) * (p.E / (2.0 * (1.0 + nu)));
+    }
+    let A11 = E1 / (1.0 - nu * nu);
+    let B11 = E2 / (1.0 - nu * nu);
+    let D11 = E3 / (1.0 - nu * nu);
+    let S44 = S0;
+    let zna = -B11 / A11;
+    return { E1, E2, E3, A11, B11, D11, S44, zna };
+  }
+
+  function computeThermalIntegrals(h, k, loadCase, type, e0) {
+    let phi_slope = 0, phi_const = 0;
+    for (let i = 0; i < 10; i++) {
+      let zi = (h / 2.0) * gp[i];
+      let wi = (h / 2.0) * gw[i];
+      let eta = zi / h + 0.5;
+      let p = getMaterialProps(zi, h, k, type, e0);
+      let g = getThermalG(eta, k, loadCase);
+      phi_slope += wi * p.E * p.alpha * g;
+      phi_const += wi * p.E * p.alpha;
+    }
+    let N0 = phi_slope / (1.0 - nu);
+    return { phi_slope, phi_const, N0 };
+  }
+
+  function computeExactConduction(k) {
+    const N = 100;
+    let etaArr = [];
+    let kInvArr = [];
+    for (let i = 0; i <= N; i++) {
+      let eta = i / N;
+      let K_val = Km + (Kc - Km) * Math.pow(eta, k);
+      etaArr.push(eta);
+      kInvArr.push(1.0 / K_val);
+    }
+    let cumInt = [0];
+    for (let i = 1; i <= N; i++) {
+      let step = (etaArr[i] - etaArr[i - 1]) * 0.5 * (kInvArr[i] + kInvArr[i - 1]);
+      cumInt.push(cumInt[i - 1] + step);
+    }
+    let totalInt = cumInt[N];
+    let maxErr = 0;
+    for (let i = 0; i <= N; i++) {
+      let exact = totalInt > 0 ? cumInt[i] / totalInt : etaArr[i];
+      let series = getThermalG(etaArr[i], k, 'NTD');
+      let err = Math.abs(series - exact);
+      if (err > maxErr) maxErr = err;
+    }
+    return maxErr;
+  }
+
+  function solveNavierMode(m, n, h, k, loadCase, Tm, type, e0, abd, therm) {
+    if (!abd) abd = computeABD_MS(h, k, type, e0);
+    if (!therm) therm = computeThermalIntegrals(h, k, loadCase, type, e0);
+
+    const al = m * Math.PI / a_plate;
+    const be = n * Math.PI / b_plate;
+    const s = (1.0 - nu) / 2.0;
+    const ks = Ks * abd.E1 / 2.0 * (1.0 - nu);
+
+    const K11 = abd.E1 * (al*al + s*be*be);
+    const K12 = abd.E1 * (1.0 + nu) / 2.0 * al * be;
+    const K14 = abd.E2 * (al*al + s*be*be);
+    const K15 = abd.E2 * (1.0 + nu) / 2.0 * al * be;
+
+    const K22 = abd.E1 * (s*al*al + be*be);
+    const K24 = abd.E2 * (1.0 + nu) / 2.0 * al * be;
+    const K25 = abd.E2 * (s*al*al + be*be);
+
+    const K33 = ks * (al*al + be*be);
+    const K34 = ks * al;
+    const K35 = ks * be;
+
+    const K44 = -abd.E3 * (al*al + s*be*be) - ks;
+    const K45 = -abd.E3 * (1.0 + nu) / 2.0 * al * be;
+    const K55 = -abd.E3 * (s*al*al + be*be) - ks;
+
+    const K = [
+      [ K11,  K12,  0,    K14,  K15 ],
+      [ K12,  K22,  0,    K24,  K25 ],
+      [ 0,    0,    K33,  K34,  K35 ],
+      [-K14, -K24, -K34,  K44,  K45 ],
+      [-K15, -K25, -K35,  K45,  K55 ]
+    ];
+
+    const Kd = det5(K);
+    const Kc_mat = [
+      [K[0][0], K[0][1], K[0][3], K[0][4]],
+      [K[1][0], K[1][1], K[1][3], K[1][4]],
+      [K[3][0], K[3][1], K[3][3], K[3][4]],
+      [K[4][0], K[4][1], K[4][3], K[4][4]]
+    ];
+    const Kc = det4(Kc_mat);
+
+    const lam = Kd / ((1.0 + nu) * (al*al + be*be) * Kc * therm.phi_slope);
+
+    let dt = lam;
+    if ((loadCase === 'LTD' || loadCase === 'NTD') && Tm !== 0) {
+      dt = lam - Tm * (therm.phi_const / therm.phi_slope);
+    }
+
+    const Kr3 = [K[0][2], K[1][2], K[3][2], K[4][2]];
+    const b_vec = Kr3.map(v => -v);
+    const x = solve4x4(Kc_mat, b_vec);
+    const u0 = x[0], v0 = x[1], psix = x[2], psiy = x[3];
+    const shearRatio = Math.abs(1.0 + psix / al);
+
+    return { m, n, lambda: lam, dt, u0, v0, psix, psiy, shearRatio, al, be };
+  }
+
+  function solveAllModes(h, k, loadCase, Tm, type, e0) {
+    const abd = computeABD_MS(h, k, type, e0);
+    const therm = computeThermalIntegrals(h, k, loadCase, type, e0);
+    let modes = [];
+    for (let m = 1; m <= 4; m++) {
+      for (let n = 1; n <= 4; n++) {
+        let res = solveNavierMode(m, n, h, k, loadCase, Tm, type, e0, abd, therm);
+        modes.push(res);
+      }
+    }
+    modes.sort((a, b) => a.dt - b.dt);
+    return { modes, critical: modes[0], abd, therm };
+  }
+
+  function renderGeometry(h) {
+    const svg = document.getElementById('svg-geometry');
+    if (!svg) return;
+    const h_mm = (h * 1000).toFixed(2);
+    document.getElementById('lbl-h-mm').textContent = h_mm + ' mm';
+
+    const ox = 250, oy = 130;
+    const sx = 140, sy = 60;
+    // Use a perceptual thickness scale so the actual a/h setting remains visible
+    // without letting the plate leave the fixed SVG viewBox at low ratios.
+    const ahVisual = Math.max(5, Math.min(200, Number(state.ah) || 100));
+    const sz = 8 + 42 * Math.log(200 / ahVisual) / Math.log(40);
+
+    function iso(x, y, z) {
+      return [ox + (x - y) * sx * 0.9, oy + (x + y) * sy * 0.9 - z * sz];
+    }
+
+    const b0 = iso(-0.5, -0.5, -0.5);
+    const b1 = iso( 0.5, -0.5, -0.5);
+    const b2 = iso( 0.5,  0.5, -0.5);
+    const b3 = iso(-0.5,  0.5, -0.5);
+
+    const t0 = iso(-0.5, -0.5,  0.5);
+    const t1 = iso( 0.5, -0.5,  0.5);
+    const t2 = iso( 0.5,  0.5,  0.5);
+    const t3 = iso(-0.5,  0.5,  0.5);
+
+    svg.innerHTML = `
+      <defs>
+        <linearGradient id="grad-top" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#f59e0b" stop-opacity="0.9"/>
+          <stop offset="100%" stop-color="#d97706" stop-opacity="0.8"/>
+        </linearGradient>
+        <linearGradient id="grad-side-x" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#d97706"/>
+          <stop offset="100%" stop-color="#64748b"/>
+        </linearGradient>
+        <linearGradient id="grad-side-y" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#b45309"/>
+          <stop offset="100%" stop-color="#475569"/>
+        </linearGradient>
+        <marker id="arrow-n0" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+          <path d="M 0 1 L 10 5 L 0 9 z" fill="#f43f5e" />
+        </marker>
+      </defs>
+      <polygon points="${b0[0]},${b0[1]} ${b1[0]},${b1[1]} ${b2[0]},${b2[1]} ${b3[0]},${b3[1]}" fill="#334155" opacity="0.3"/>
+      <polygon points="${t1[0]},${t1[1]} ${t2[0]},${t2[1]} ${b2[0]},${b2[1]} ${b1[0]},${b1[1]}" fill="url(#grad-side-x)" stroke="var(--border)" stroke-width="1"/>
+      <polygon points="${t0[0]},${t0[1]} ${t3[0]},${t3[1]} ${b3[0]},${b3[1]} ${b0[0]},${b0[1]}" fill="url(#grad-side-y)" stroke="var(--border)" stroke-width="1"/>
+      <polygon points="${t0[0]},${t0[1]} ${t1[0]},${t1[1]} ${t2[0]},${t2[1]} ${t3[0]},${t3[1]}" fill="url(#grad-top)" stroke="#f59e0b" stroke-width="1.5"/>
+      <text x="${(t0[0]+t2[0])/2}" y="${(t0[1]+t2[1])/2 + 4}" fill="#ffffff" font-size="11" font-weight="700" text-anchor="middle">
+        Top Face: Ceramic-Rich (z = +h/2)
+      </text>
+      <text x="${b1[0] + 10}" y="${b1[1] + 12}" fill="var(--text-muted)" font-size="10" font-family="var(--font-mono)">
+        Bottom: Metal (z = -h/2)
+      </text>
+      <circle cx="${t0[0] - 14}" cy="${t0[1]}" r="4" fill="#10b981" />
+      <text x="${t0[0] - 22}" y="${t0[1] + 4}" fill="#10b981" font-size="9" text-anchor="end" font-weight="bold">x=0 SSSS</text>
+      <circle cx="${t2[0] + 14}" cy="${t2[1]}" r="4" fill="#10b981" />
+      <text x="${t2[0] + 22}" y="${t2[1] + 4}" fill="#10b981" font-size="9" text-anchor="start" font-weight="bold">x=a SSSS</text>
+      <line x1="${t0[0] - 25}" y1="${(t0[1]+t1[1])/2 - 12}" x2="${t0[0] - 5}" y2="${(t0[1]+t1[1])/2 - 3}" stroke="#f43f5e" stroke-width="2" marker-end="url(#arrow-n0)"/>
+      <line x1="${t1[0] + 25}" y1="${(t1[1]+t2[1])/2 - 12}" x2="${t1[0] + 5}" y2="${(t1[1]+t2[1])/2 - 3}" stroke="#f43f5e" stroke-width="2" marker-end="url(#arrow-n0)"/>
+    `;
+  }
+
+  function renderMaterials(h, k, type, e0) {
+    const svg = document.getElementById('svg-materials');
+    if (!svg) return;
+
+    const W = 500, H = 240;
+    const padL = 60, padR = 120, padT = 25, padB = 40;
+    const plotW = W - padL - padR;
+    const plotH = H - padT - padB;
+
+    let pointsE = [], pointsAlpha = [], pointsE_base = [], pointsAlpha_base = [];
+    let minE = Infinity, maxE = -Infinity;
+    let minA = Infinity, maxA = -Infinity;
+    const N = 40;
+
+    for (let i = 0; i <= N; i++) {
+      let eta = i / N;
+      let zi = (eta - 0.5) * h;
+      let actual = getMaterialProps(zi, h, k, type, e0);
+      let base = getMaterialProps(zi, h, k, 'none', 0.0);
+
+      pointsE.push({ z: zi / h, val: actual.E / 1e9 });
+      pointsAlpha.push({ z: zi / h, val: actual.alpha * 1e6 });
+      pointsE_base.push({ z: zi / h, val: base.E / 1e9 });
+      pointsAlpha_base.push({ z: zi / h, val: base.alpha * 1e6 });
+
+      if (actual.E < minE) minE = actual.E;
+      if (actual.E > maxE) maxE = actual.E;
+      if (actual.alpha < minA) minA = actual.alpha;
+      if (actual.alpha > maxA) maxA = actual.alpha;
+    }
+
+    const warningEl = document.getElementById('alert-property-warning');
+    const warningText = document.getElementById('alert-warning-text');
+    const poreStatus = document.getElementById('lbl-pore-status');
+
+    if (minE <= 0 || minA <= 0) {
+      warningEl.classList.add('visible');
+      warningText.textContent = `Warning: Property values become non-positive (Min E: ${(minE/1e9).toFixed(1)} GPa, Min α: ${(minA*1e6).toFixed(1)} ppm/K)! In Javaheri (2002), even porosity causes E <= 0 when e0 >= 0.311.`;
+      poreStatus.textContent = 'NON-PHYSICAL (E or α ≤ 0)';
+      poreStatus.style.color = 'var(--danger)';
+    } else {
+      warningEl.classList.remove('visible');
+      poreStatus.textContent = type === 'none' ? 'Perfect (No Pores)' : `Porous (${type}, e0=${e0})`;
+      poreStatus.style.color = 'var(--success)';
+    }
+
+    function mapX(e_gpa) { return padL + (e_gpa / 400.0) * plotW; }
+    function mapY(zh) { return padT + (0.5 - zh) * plotH; }
+
+    let pathE = 'M ' + pointsE.map(p => `${mapX(p.val)},${mapY(p.z)}`).join(' L ');
+    let pathE_base = 'M ' + pointsE_base.map(p => `${mapX(p.val)},${mapY(p.z)}`).join(' L ');
+
+    function mapXA(a_ppm) { return padL + (a_ppm / 25.0) * plotW; }
+    let pathA = 'M ' + pointsAlpha.map(p => `${mapXA(p.val)},${mapY(p.z)}`).join(' L ');
+    let pathA_base = 'M ' + pointsAlpha_base.map(p => `${mapXA(p.val)},${mapY(p.z)}`).join(' L ');
+
+    let stripeX = W - 80;
+    let stripeW = 28;
+
+    svg.innerHTML = `
+      <defs>
+        <linearGradient id="mat-stripe-grad" x1="0" y1="1" x2="0" y2="0">
+          <stop offset="0%" stop-color="#94a3b8"/>
+          <stop offset="100%" stop-color="#f59e0b"/>
+        </linearGradient>
+      </defs>
+      <line x1="${padL}" y1="${padT}" x2="${padL}" y2="${H - padB}" stroke="var(--border)" stroke-width="1.5"/>
+      <line x1="${padL}" y1="${H - padB}" x2="${padL + plotW}" y2="${H - padB}" stroke="var(--border)" stroke-width="1.5"/>
+      <text x="${padL - 8}" y="${mapY(0.5) + 4}" fill="var(--text-muted)" font-size="10" text-anchor="end">+h/2</text>
+      <text x="${padL - 8}" y="${mapY(0.0) + 4}" fill="var(--text-muted)" font-size="10" text-anchor="end">0</text>
+      <text x="${padL - 8}" y="${mapY(-0.5) + 4}" fill="var(--text-muted)" font-size="10" text-anchor="end">-h/2</text>
+      <line x1="${padL}" y1="${mapY(0.0)}" x2="${padL + plotW}" y2="${mapY(0.0)}" stroke="var(--border)" stroke-dasharray="3,3"/>
+      <text x="${mapX(70)}" y="${H - padB + 16}" fill="var(--text-muted)" font-size="10" text-anchor="middle">70</text>
+      <text x="${mapX(200)}" y="${H - padB + 16}" fill="var(--text-muted)" font-size="10" text-anchor="middle">200</text>
+      <text x="${mapX(380)}" y="${H - padB + 16}" fill="var(--text-muted)" font-size="10" text-anchor="middle">380 GPa</text>
+      <path d="${pathE_base}" fill="none" stroke="var(--text-muted)" stroke-width="1.5" stroke-dasharray="4,4"/>
+      <path d="${pathE}" fill="none" stroke="var(--accent)" stroke-width="2.5"/>
+      <path d="${pathA_base}" fill="none" stroke="var(--text-muted)" stroke-width="1" stroke-dasharray="4,4"/>
+      <path d="${pathA}" fill="none" stroke="var(--ceramic)" stroke-width="2"/>
+      <rect x="${stripeX}" y="${padT}" width="${stripeW}" height="${plotH}" fill="url(#mat-stripe-grad)" stroke="var(--border)" rx="4"/>
+      <text x="${stripeX + stripeW/2}" y="${padT - 6}" fill="var(--ceramic)" font-size="9" text-anchor="middle" font-weight="700">Ceramic</text>
+      <text x="${stripeX + stripeW/2}" y="${H - padB + 14}" fill="var(--metal)" font-size="9" text-anchor="middle" font-weight="700">Metal</text>
+    `;
+  }
+
+  function renderThermal(h, k, loadCase, type, e0) {
+    const svg = document.getElementById('svg-thermal');
+    if (!svg) return;
+
+    const W = 500, H = 240;
+    const padL = 50, padR = 30, padT = 25, padB = 40;
+    const plotW = W - padL - padR;
+    const plotH = H - padT - padB;
+
+    let ptsUTD = [], ptsLTD = [], ptsNTD = [], ptsIntegrand = [];
+    const N = 40;
+    let maxIntegrand = 0;
+
+    for (let i = 0; i <= N; i++) {
+      let eta = i / N;
+      let zi = (eta - 0.5) * h;
+      let gU = getThermalG(eta, k, 'UTD');
+      let gL = getThermalG(eta, k, 'LTD');
+      let gN = getThermalG(eta, k, 'NTD');
+      let p = getMaterialProps(zi, h, k, type, e0);
+      let gCurr = getThermalG(eta, k, loadCase);
+      let integr = p.E * p.alpha * gCurr;
+
+      ptsUTD.push({ eta, val: gU });
+      ptsLTD.push({ eta, val: gL });
+      ptsNTD.push({ eta, val: gN });
+      ptsIntegrand.push({ eta, val: integr });
+      if (integr > maxIntegrand) maxIntegrand = integr;
+    }
+
+    function mapX(eta) { return padL + eta * plotW; }
+    function mapYG(g) { return padT + (1.0 - g) * plotH; }
+
+    let pathU = 'M ' + ptsUTD.map(p => `${mapX(p.eta)},${mapYG(p.val)}`).join(' L ');
+    let pathL = 'M ' + ptsLTD.map(p => `${mapX(p.eta)},${mapYG(p.val)}`).join(' L ');
+    let pathN = 'M ' + ptsNTD.map(p => `${mapX(p.eta)},${mapYG(p.val)}`).join(' L ');
+
+    let areaPts = ptsIntegrand.map(p => {
+      let norm = maxIntegrand > 0 ? p.val / maxIntegrand : 0;
+      return `${mapX(p.eta)},${padT + (1.0 - norm) * plotH}`;
+    });
+    let areaPath = `M ${mapX(0)},${H - padB} L ` + areaPts.join(' L ') + ` L ${mapX(1)},${H - padB} Z`;
+
+    const err = computeExactConduction(k);
+    document.getElementById('lbl-conduction-err').textContent = (err * 100).toFixed(3) + '% max error';
+
+    svg.innerHTML = `
+      <defs>
+        <linearGradient id="area-grad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.35"/>
+          <stop offset="100%" stop-color="#38bdf8" stop-opacity="0.05"/>
+        </linearGradient>
+      </defs>
+      <line x1="${padL}" y1="${padT}" x2="${padL}" y2="${H - padB}" stroke="var(--border)" stroke-width="1.5"/>
+      <line x1="${padL}" y1="${H - padB}" x2="${padL + plotW}" y2="${H - padB}" stroke="var(--border)" stroke-width="1.5"/>
+      <text x="${padL - 8}" y="${mapYG(1.0) + 4}" fill="var(--text-muted)" font-size="10" text-anchor="end">1.0</text>
+      <text x="${padL - 8}" y="${mapYG(0.5) + 4}" fill="var(--text-muted)" font-size="10" text-anchor="end">0.5</text>
+      <text x="${padL - 8}" y="${mapYG(0.0) + 4}" fill="var(--text-muted)" font-size="10" text-anchor="end">0.0</text>
+      <text x="${mapX(0.0)}" y="${H - padB + 16}" fill="var(--text-muted)" font-size="10" text-anchor="middle">η=0 (Metal)</text>
+      <text x="${mapX(0.5)}" y="${H - padB + 16}" fill="var(--text-muted)" font-size="10" text-anchor="middle">0.5</text>
+      <text x="${mapX(1.0)}" y="${H - padB + 16}" fill="var(--text-muted)" font-size="10" text-anchor="middle">η=1 (Ceramic)</text>
+      <path d="${areaPath}" fill="url(#area-grad)"/>
+      <path d="${pathU}" fill="none" stroke="#94a3b8" stroke-width="2" stroke-dasharray="4,4"/>
+      <path d="${pathL}" fill="none" stroke="#fbbf24" stroke-width="2" stroke-dasharray="2,2"/>
+      <path d="${pathN}" fill="none" stroke="var(--accent)" stroke-width="2.5"/>
+      <g transform="translate(${padL + 20}, ${padT + 15})">
+        <line x1="0" y1="0" x2="16" y2="0" stroke="#94a3b8" stroke-dasharray="3,3" stroke-width="2"/>
+        <text x="22" y="3" fill="var(--text-muted)" font-size="10">UTD: g = 1</text>
+        <line x1="0" y1="16" x2="16" y2="16" stroke="#fbbf24" stroke-dasharray="2,2" stroke-width="2"/>
+        <text x="22" y="19" fill="var(--text-muted)" font-size="10">LTD: g = η</text>
+        <line x1="0" y1="32" x2="16" y2="32" stroke="var(--accent)" stroke-width="2.5"/>
+        <text x="22" y="35" fill="var(--accent)" font-size="10" font-weight="700">NTD: 6-term series</text>
+      </g>
+    `;
+  }
+
+  function renderFSDT(abd, psix, dwdx, gamma) {
+    const svg = document.getElementById('svg-fsdt');
+    if (!svg) return;
+
+    document.getElementById('lbl-a11').textContent = (abd.A11 / 1e6).toFixed(1);
+    document.getElementById('lbl-b11').textContent = (abd.B11 / 1e3).toFixed(1);
+    document.getElementById('lbl-d11').textContent = (abd.D11).toFixed(1);
+    document.getElementById('lbl-zna').textContent = (abd.zna * 1000).toFixed(2);
+
+    const cx = 250, cy = 120;
+    const len = 70;
+    const x0 = cx, y0 = cy - len, y1 = cy + len;
+
+    const angleVis = (psix || -3.0) * 0.04;
+    const dx = Math.sin(angleVis) * len;
+    const dy = Math.cos(angleVis) * len;
+
+    svg.innerHTML = `
+      <line x1="100" y1="${cy}" x2="400" y2="${cy}" stroke="var(--border)" stroke-width="2"/>
+      <text x="410" y="${cy + 4}" fill="var(--text-muted)" font-size="10">Mid-surface (z=0)</text>
+      <line x1="100" y1="${cy - abd.zna * 1200}" x2="400" y2="${cy - abd.zna * 1200}" stroke="var(--accent)" stroke-width="1.5" stroke-dasharray="4,2"/>
+      <text x="410" y="${cy - abd.zna * 1200 + 4}" fill="var(--accent)" font-size="10" font-weight="bold">Neutral Axis (z_na = -B/A)</text>
+      <line x1="${x0}" y1="${y0}" x2="${x0}" y2="${y1}" stroke="var(--text-muted)" stroke-width="1.5" stroke-dasharray="4,4"/>
+      <text x="${x0}" y="${y0 - 8}" fill="var(--text-muted)" font-size="10" text-anchor="middle">Initial Normal</text>
+      <line x1="${cx - dx}" y1="${cy - dy}" x2="${cx + dx}" y2="${cy + dy}" stroke="#f59e0b" stroke-width="3"/>
+      <circle cx="${cx - dx}" cy="${cy - dy}" r="4" fill="#f59e0b"/>
+      <circle cx="${cx + dx}" cy="${cy + dy}" r="4" fill="#64748b"/>
+      <path d="M ${cx},${cy - 40} A 40 40 0 0 1 ${cx - dx*0.55},${cy - dy*0.55}" fill="none" stroke="var(--accent)" stroke-width="2"/>
+      <text x="${cx - 15}" y="${cy - 46}" fill="var(--accent)" font-size="11" font-weight="700">ψ_x (Rotation)</text>
+      <text x="250" y="220" fill="var(--text-muted)" font-size="11" font-family="var(--font-mono)" text-anchor="middle">
+        Mindlin Shear Strain: γ_xz = ∂w/∂x + ψ_x ≠ 0
+      </text>
+    `;
+  }
+
+  function renderMesh(meshN) {
+    const svg = document.getElementById('svg-mesh');
+    if (!svg) return;
+
+    const nx = meshN, ny = meshN;
+    const num_nodes = (2 * nx + 1) * (2 * ny + 1) - nx * ny;
+    const total_dofs = num_nodes * 5;
+    const fixed_dofs = (2 * (2 * nx + 1) + 2 * (2 * ny - 1)) * 3;
+    const free_dofs = total_dofs - fixed_dofs;
+
+    document.getElementById('lbl-total-nodes').textContent = num_nodes;
+    document.getElementById('lbl-total-dofs').textContent = total_dofs;
+    document.getElementById('lbl-free-dofs').textContent = free_dofs;
+
+    const W = 300, H = 240;
+    const pad = 25;
+    const spanX = (W - 2 * pad) / nx;
+    const spanY = (H - 2 * pad) / ny;
+
+    let rects = [];
+    for (let j = 0; j < ny; j++) {
+      for (let i = 0; i < nx; i++) {
+        let x = pad + i * spanX;
+        let y = pad + (ny - 1 - j) * spanY;
+        rects.push(`<rect x="${x}" y="${y}" width="${spanX}" height="${spanY}" fill="var(--bg-card)" stroke="var(--border)" stroke-width="1"/>`);
+        if (nx <= 8) {
+          rects.push(`<circle cx="${x + spanX*0.35}" cy="${y + spanY*0.35}" r="1.5" fill="#f43f5e" opacity="0.6"/>`);
+          rects.push(`<circle cx="${x + spanX*0.65}" cy="${y + spanY*0.35}" r="1.5" fill="#f43f5e" opacity="0.6"/>`);
+          rects.push(`<circle cx="${x + spanX*0.35}" cy="${y + spanY*0.65}" r="1.5" fill="#f43f5e" opacity="0.6"/>`);
+          rects.push(`<circle cx="${x + spanX*0.65}" cy="${y + spanY*0.65}" r="1.5" fill="#f43f5e" opacity="0.6"/>`);
+        }
+      }
+    }
+
+    let nodesSVG = [];
+    const stepX = spanX / 2;
+    const stepY = spanY / 2;
+
+    for (let r = 0; r <= 2 * ny; r++) {
+      for (let c = 0; c <= 2 * nx; c++) {
+        if (r % 2 === 1 && c % 2 === 1) continue;
+        let x = pad + c * stepX;
+        let y = pad + (2 * ny - r) * stepY;
+        let isXEdge = (c === 0 || c === 2 * nx);
+        let isYEdge = (r === 0 || r === 2 * ny);
+
+        if (isXEdge || isYEdge) {
+          let col = (isXEdge && isYEdge) ? '#a855f7' : (isXEdge ? '#10b981' : '#38bdf8');
+          nodesSVG.push(`<circle cx="${x}" cy="${y}" r="2.5" fill="${col}"/>`);
+        }
+      }
+    }
+
+    svg.innerHTML = `
+      ${rects.join('')}
+      ${nodesSVG.join('')}
+      <text x="${W/2}" y="${H - 6}" fill="var(--text-muted)" font-size="9" text-anchor="middle">
+        Q8 Mesh: ${nx}×${ny} Elements · SSSS Perimeter Constrained
+      </text>
+    `;
+
+    renderSparsity(meshN);
+  }
+
+  function renderSparsity(meshN) {
+    const canvas = document.getElementById('canvas-sparsity');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const S = canvas.width;
+    ctx.clearRect(0, 0, S, S);
+    ctx.fillStyle = '#0f172a';
+    ctx.fillRect(0, 0, S, S);
+
+    const num_blocks = meshN * 2;
+    const bw = S / num_blocks;
+
+    for (let i = 0; i < num_blocks; i++) {
+      for (let j = Math.max(0, i - 2); j <= Math.min(num_blocks - 1, i + 2); j++) {
+        let alpha = 1.0 - Math.abs(i - j) * 0.25;
+        ctx.fillStyle = `rgba(56, 189, 248, ${alpha})`;
+        ctx.fillRect(j * bw + 1, i * bw + 1, bw - 2, bw - 2);
+      }
+    }
+  }
+
+  function render3DModeSurface(m, n) {
+    const canvas = document.getElementById('canvas-mode3d');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+
+    const dpr = window.devicePixelRatio || 1;
+    const rect = canvas.getBoundingClientRect();
+    canvas.width = rect.width * dpr;
+    canvas.height = rect.height * dpr;
+    ctx.scale(dpr, dpr);
+
+    const W = rect.width;
+    const H = rect.height;
+    ctx.clearRect(0, 0, W, H);
+
+    const grid = 28;
+    const radX = (state.rotX * Math.PI) / 180;
+    const radY = (state.rotY * Math.PI) / 180;
+
+    const cosX = Math.cos(radX), sinX = Math.sin(radX);
+    const cosY = Math.cos(radY), sinY = Math.sin(radY);
+
+    const scale = Math.min(W, H) * 0.45;
+    const cx = W / 2, cy = H / 2 + 10;
+
+    function project(x, y, z) {
+      let x1 = x * cosY + z * sinY;
+      let z1 = -x * sinY + z * cosY;
+      let y2 = y * cosX - z1 * sinX;
+      let z2 = y * sinX + z1 * cosX;
+      return {
+        px: cx + x1 * scale,
+        py: cy - y2 * scale,
+        depth: z2
+      };
+    }
+
+    let quads = [];
+    for (let i = 0; i < grid; i++) {
+      for (let j = 0; j < grid; j++) {
+        let u0 = i / grid, u1 = (i + 1) / grid;
+        let v0 = j / grid, v1 = (j + 1) / grid;
+
+        let x0 = u0 - 0.5, x1 = u1 - 0.5;
+        let y0 = v0 - 0.5, y1 = v1 - 0.5;
+
+        let w00 = Math.sin(m * Math.PI * u0) * Math.sin(n * Math.PI * v0);
+        let w10 = Math.sin(m * Math.PI * u1) * Math.sin(n * Math.PI * v0);
+        let w11 = Math.sin(m * Math.PI * u1) * Math.sin(n * Math.PI * v1);
+        let w01 = Math.sin(m * Math.PI * u0) * Math.sin(n * Math.PI * v1);
+
+        let zScale = 0.35;
+        let p00 = project(x0, y0, w00 * zScale);
+        let p10 = project(x1, y0, w10 * zScale);
+        let p11 = project(x1, y1, w11 * zScale);
+        let p01 = project(x0, y1, w01 * zScale);
+
+        let avgZ = (p00.depth + p10.depth + p11.depth + p01.depth) / 4;
+        let avgW = (w00 + w10 + w11 + w01) / 4;
+
+        quads.push({ p00, p10, p11, p01, depth: avgZ, w: avgW });
+      }
+    }
+
+    quads.sort((a, b) => a.depth - b.depth);
+
+    function getColor(w) {
+      if (w >= 0) {
+        let r = Math.floor(56 + w * (244 - 56));
+        let g = Math.floor(189 - w * 126);
+        let b = Math.floor(248 - w * 154);
+        return `rgb(${r},${g},${b})`;
+      } else {
+        let mag = -w;
+        let r = Math.floor(56 - mag * 30);
+        let g = Math.floor(189 - mag * 100);
+        let b = Math.floor(248);
+        return `rgb(${r},${g},${b})`;
+      }
+    }
+
+    quads.forEach(q => {
+      ctx.beginPath();
+      ctx.moveTo(q.p00.px, q.p00.py);
+      ctx.lineTo(q.p10.px, q.p10.py);
+      ctx.lineTo(q.p11.px, q.p11.py);
+      ctx.lineTo(q.p01.px, q.p01.py);
+      ctx.closePath();
+      ctx.fillStyle = getColor(q.w);
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(0,0,0,0.15)';
+      ctx.lineWidth = 0.5;
+      ctx.stroke();
+    });
+  }
+
+  function renderParametric(currentSol, selectedSol = currentSol) {
+    const svg = document.getElementById('svg-parametric');
+    if (!svg) return;
+
+    const W = 1000, H = 430;
+    const padL = 92, padR = 28, padT = 54, padB = 72;
+    const plotW = W - padL - padR;
+    const plotH = H - padT - padB;
+
+    let xMin, xMax, yMin = 0, yMax = 1000;
+    let xTicks;
+    const modeM = selectedSol.m;
+    const modeN = selectedSol.n;
+    const isCriticalMode = modeM === 1 && modeN === 1;
+    let curvePts = [];
+    let benchHSDT = [];
+    let benchCPT = [];
+    let femPoints = [];
+    let csvPoints = [];
+
+    if (state.paramTab === 'ah') {
+      xMin = 5; xMax = Math.max(120, state.ah);
+      xTicks = [10, 20, 30, 40, 60, 80, 100, 120];
+      if (state.ah > 120) xTicks.push(160, 200);
+      xTicks = xTicks.filter(x => x >= xMin && x <= xMax);
+      for (let ah = 10; ah <= 120; ah += 2) {
+        let h = a_plate / ah;
+        let sol = solveNavierMode(modeM, modeN, h, state.k, state.loadCase, state.Tm, state.porosity, state.e0);
+        curvePts.push({ x: ah, y: sol.dt });
+      }
+
+      if (isCriticalMode && Math.abs(state.k - 1.0) < 1e-4 && state.porosity === 'none') {
+        let tKey = state.loadCase === 'UTD' ? 'table2' : (state.loadCase === 'LTD' ? 'table4' : 'table6');
+        let tData = PAPER_BENCHMARKS[tKey];
+        if (tData) {
+          benchHSDT = tData.ah.map((ah, idx) => ({ x: ah, y: tData.hsdt[idx] }));
+          benchCPT = tData.ah.map((ah, idx) => ({ x: ah, y: tData.cpt[idx] }));
+        }
+      }
+
+      if (state.porosity === 'none') {
+        [10, 20, 40, 100].forEach(ah => {
+          let key = `k${Math.round(state.k)}_ah${ah}_${state.loadCase}`;
+          if (FEM_REF.lookup && FEM_REF.lookup[key] !== undefined) {
+            femPoints.push({ x: ah, y: FEM_REF.lookup[key] });
+          }
+        });
+      }
+
+      CSV_ROWS.forEach(r => {
+        if (Math.abs(parseFloat(r.k) - state.k) < 1e-4 && r.thermal_distribution === state.loadCase) {
+          csvPoints.push({ x: parseFloat(r.a_over_h), y: parseFloat(r.DeltaT_cr) });
+        }
+      });
+    } else if (state.paramTab === 'k') {
+      xMin = 0; xMax = 10;
+      xTicks = [0, 0.5, 1, 2, 5, 10];
+      for (let kVal = 0; kVal <= 10; kVal += 0.25) {
+        let h = a_plate / state.ah;
+        let sol = solveNavierMode(modeM, modeN, h, kVal, state.loadCase, state.Tm, state.porosity, state.e0);
+        curvePts.push({ x: kVal, y: sol.dt });
+      }
+      if (isCriticalMode && state.ah === 100 && state.porosity === 'none' && PAPER_BENCHMARKS.k_study) {
+        let kStudy = PAPER_BENCHMARKS.k_study;
+        let series = state.loadCase === 'UTD' ? kStudy.utd_hsdt : (state.loadCase === 'LTD' ? kStudy.ltd_hsdt : kStudy.ntd_hsdt);
+        benchHSDT = kStudy.k.map((k, idx) => ({ x: k, y: series[idx] }));
+      }
+    } else if (state.paramTab === 'e0') {
+      xMin = 0; xMax = 0.6;
+      xTicks = [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6];
+      for (let eVal = 0; eVal <= 0.6; eVal += 0.02) {
+        let h = a_plate / state.ah;
+        let sol = solveNavierMode(modeM, modeN, h, state.k, state.loadCase, state.Tm, state.porosity, eVal);
+        curvePts.push({ x: eVal, y: sol.dt });
+      }
+    }
+
+    let allY = curvePts.map(p => p.y)
+      .concat(benchHSDT.map(p => p.y), benchCPT.map(p => p.y), femPoints.map(p => p.y), csvPoints.map(p => p.y))
+      .filter(y => !isNaN(y) && isFinite(y) && (!state.isLogScale || y > 0));
+    if (allY.length > 0) {
+      const dataMin = Math.min(...allY);
+      const dataMax = Math.max(...allY);
+      if (state.isLogScale) {
+        yMin = Math.max(0.1, dataMin);
+        yMax = Math.max(yMin * 10, dataMax);
+      } else {
+        const span = Math.max(1, dataMax - dataMin);
+        yMin = Math.min(0, dataMin - span * 0.08);
+        yMax = dataMax + span * 0.08;
+      }
+    }
+
+    function mapX(x) { return padL + ((x - xMin) / (xMax - xMin)) * plotW; }
+    function mapY(y) {
+      if (state.isLogScale) {
+        let logMin = Math.log10(Math.max(0.1, yMin));
+        let logMax = Math.log10(Math.max(1.0, yMax));
+        let logY = Math.log10(Math.max(0.1, y));
+        return padT + (1.0 - (logY - logMin) / (logMax - logMin)) * plotH;
+      }
+      return padT + (1.0 - (y - yMin) / (yMax - yMin)) * plotH;
+    }
+
+    const matlab = {
+      blue: '#0072BD',
+      red: '#D95319',
+      green: '#77AC30',
+      purple: '#7E2F8E',
+      axis: 'var(--chart-axis)',
+      grid: 'var(--chart-grid)',
+      text: 'var(--chart-text)',
+      muted: 'var(--chart-muted)',
+      background: 'var(--chart-bg)'
+    };
+    const finiteCurve = curvePts.filter(p => isFinite(p.y) && (!state.isLogScale || p.y > 0));
+    let curvePath = finiteCurve.length ? 'M ' + finiteCurve.map(p => `${mapX(p.x)},${mapY(p.y)}`).join(' L ') : '';
+
+    let hsdtSVGElements = benchHSDT.map(p =>
+      `<rect x="${mapX(p.x) - 5}" y="${mapY(p.y) - 5}" width="10" height="10" fill="${matlab.red}" stroke="${matlab.red}"><title>Javaheri HSDT: ${p.x}, ${p.y.toFixed(4)} °C</title></rect>`
+    ).join('');
+
+    let cptSVGElements = benchCPT.map(p =>
+      `<polygon points="${mapX(p.x)},${mapY(p.y) - 6} ${mapX(p.x) - 6},${mapY(p.y) + 5} ${mapX(p.x) + 6},${mapY(p.y) + 5}" fill="none" stroke="#EDB120" stroke-width="2"><title>Javaheri CPT: ${p.x}, ${p.y.toFixed(4)} °C</title></polygon>`
+    ).join('');
+
+    let femSVGElements = femPoints.map(p =>
+      `<circle cx="${mapX(p.x)}" cy="${mapY(p.y)}" r="5" fill="${matlab.green}" stroke="#ffffff" stroke-width="1.5"><title>FEA MATLAB: ${p.x}, ${p.y.toFixed(4)} °C</title></circle>`
+    ).join('');
+
+    let csvSVGElements = csvPoints.map(p =>
+      `<rect x="${mapX(p.x) - 4}" y="${mapY(p.y) - 4}" width="8" height="8" fill="${matlab.purple}" transform="rotate(45, ${mapX(p.x)}, ${mapY(p.y)})"><title>CSV parametric: ${p.x}, ${p.y.toFixed(4)} °C</title></rect>`
+    ).join('');
+
+    const yTicks = state.isLogScale
+      ? [1, 10, 100, 1000, 10000].filter(v => v >= yMin && v <= yMax)
+      : Array.from({ length: 6 }, (_, i) => yMin + (yMax - yMin) * i / 5);
+    const fmt = (value) => Math.abs(value) >= 1000 ? value.toExponential(1) : (Math.abs(value) < 1 ? value.toFixed(2) : value.toFixed(0));
+    const xLabel = state.paramTab === 'ah' ? 'Slenderness ratio a/h' : (state.paramTab === 'k' ? 'Power-Law Gradation Index n' : 'Porosity volume fraction e₀');
+    const title = state.paramTab === 'ah' ? 'Critical Buckling Temperature vs. a/h' : (state.paramTab === 'k' ? 'Critical Buckling Temperature vs. n' : 'Critical Buckling Temperature vs. e₀');
+    const subtitle = `Mode (${modeM},${modeN}) · a/h = ${state.ah}, n = ${state.k.toFixed(1)}, e₀ = ${state.e0.toFixed(2)}, ${state.loadCase}`;
+    const gridX = xTicks.map(x => `<line x1="${mapX(x)}" y1="${padT}" x2="${mapX(x)}" y2="${H - padB}" stroke="${matlab.grid}" stroke-width="1"/>`).join('');
+    const gridY = yTicks.map(y => `<line x1="${padL}" y1="${mapY(y)}" x2="${padL + plotW}" y2="${mapY(y)}" stroke="${matlab.grid}" stroke-width="1"/>`).join('');
+    const xLabels = xTicks.map(x => `<text x="${mapX(x)}" y="${H - padB + 22}" fill="${matlab.text}" font-size="13" text-anchor="middle">${x}</text>`).join('');
+    const yLabels = yTicks.map(y => `<text x="${padL - 12}" y="${mapY(y) + 5}" fill="${matlab.text}" font-size="13" text-anchor="end">${fmt(y)}</text>`).join('');
+
+    svg.innerHTML = `
+      <rect x="${padL}" y="${padT}" width="${plotW}" height="${plotH}" fill="${matlab.background}" stroke="${matlab.axis}" stroke-width="1.2"/>
+      ${gridX}${gridY}${xLabels}${yLabels}
+      <text x="${padL + plotW / 2}" y="24" fill="${matlab.text}" font-size="17" font-weight="700" text-anchor="middle">${title}</text>
+      <text x="${padL + plotW / 2}" y="43" fill="${matlab.muted}" font-size="12" text-anchor="middle">${subtitle}</text>
+      <text x="${padL + plotW / 2}" y="${H - 18}" fill="${matlab.text}" font-size="14" text-anchor="middle">${xLabel}</text>
+      <text x="20" y="${padT + plotH / 2}" fill="${matlab.text}" font-size="14" text-anchor="middle" transform="rotate(-90 20 ${padT + plotH / 2})">Critical temperature difference ΔTcr (°C)</text>
+      <path d="${curvePath}" fill="none" stroke="${matlab.blue}" stroke-width="2.5"/>
+      ${hsdtSVGElements}
+      ${cptSVGElements}
+      ${femSVGElements}
+      <circle cx="${mapX(state.paramTab === 'ah' ? state.ah : (state.paramTab === 'k' ? state.k : state.e0))}" cy="${mapY(selectedSol.dt)}" r="7" fill="#EDB120" stroke="#ffffff" stroke-width="2.5"><title>Selected mode (${modeM},${modeN}): ${selectedSol.dt.toFixed(4)} °C</title></circle>
+    `;
+  }
+
+  const TRACEABILITY_DATA = [
+    {
+      eq: "Eq. (1), (3)",
+      category: "materials",
+      desc: "FGM Rule of Mixtures with Power-Law Ceramic Volume Fraction: V_c(z) = (z/h + 0.5)^k",
+      fsdt: "E(z) = E_m + (E_c - E_m)·V_c(z) - U_E(z)",
+      file: "get_effective_properties.m",
+      status: "Verified (100% Match)"
+    },
+    {
+      eq: "Eq. (5), (6)",
+      category: "thermal",
+      desc: "Thermal Membrane Prestress Integrand: Φ₁ = ∫ E(z)·α(z)·ΔT(z) dz",
+      fsdt: "Φ_slope = ∫ E·α·g dz; Φ_const = ∫ E·α dz",
+      file: "compute_thermal_resultants.m",
+      status: "Verified (Gauss 10-pt)"
+    },
+    {
+      eq: "Eq. (13F)",
+      category: "fsdt",
+      desc: "First-Order Shear Laminate Rigidity Matrices [A, B, D, S]",
+      fsdt: "[A, B, D] = ∫ (E/(1-ν²))·[1, z, z²] dz · Q₀; S = (5/6)·∫ G dz · I₂",
+      file: "compute_ABD_MS.m",
+      status: "Verified (Exact)"
+    },
+    {
+      eq: "Eq. (19)",
+      category: "materials",
+      desc: "Pre-buckling Membrane Stress Resultant under In-plane SSSS Restraints",
+      fsdt: "N_x0 = N_y0 = -Φ₁ / (1 - ν); N_xy0 = 0",
+      file: "assemble_thermal_geometric.m",
+      status: "Verified"
+    },
+    {
+      eq: "Eq. (24)",
+      category: "solver",
+      desc: "Analytical Navier Characteristic Buckling Determinant (FSDT Matrix Form)",
+      fsdt: "λ_cr = det(K_N0=0) / [(1+ν)(α²+β²)·det(K_minor)·Φ_slope]",
+      file: "run_thermal_buckling_case.m",
+      status: "Verified (0.013% Avg Error)"
+    },
+    {
+      eq: "Eq. (27), (28)",
+      category: "thermal",
+      desc: "Linear Temperature Across Thickness (LTD) & Ambient Metal Temp Shift",
+      fsdt: "ΔT_cr = λ_cr - T_m·(Φ_const / Φ_slope)",
+      file: "run_thermal_buckling_case.m",
+      status: "Verified (Table 4 Match)"
+    },
+    {
+      eq: "Eq. (33)-(35)",
+      category: "thermal",
+      desc: "Nonlinear Steady-State Conduction Across Thickness (NTD 6-term series)",
+      fsdt: "g(η) = poly₅(η) / C; C = 1 - r/(k+1) + r²/(2k+1) - ...",
+      file: "compute_thermal_resultants.m",
+      status: "Verified (Table 6 Match)"
+    },
+    {
+      eq: "Eq. (37)-(40)",
+      category: "solver",
+      desc: "Equilibrium & Generalized Eigenvalue Formulation [K - λ·K_gT]·φ = 0",
+      fsdt: "Condensed boundary DOFs -> eigs(K_red, KgT_red, 1, 'sm')",
+      file: "run_thermal_buckling_case.m",
+      status: "Verified (Table 2-8)"
+    }
+  ];
+
+  function renderTraceabilityTable(filter) {
+    const tbody = document.getElementById('tbl-traceability-body');
+    if (!tbody) return;
+
+    let rows = TRACEABILITY_DATA.filter(item => filter === 'all' || item.category === filter);
+    tbody.innerHTML = rows.map(r => `
+      <tr>
+        <td><strong>${r.eq}</strong></td>
+        <td>${r.desc}</td>
+        <td><code>${r.fsdt}</code></td>
+        <td><span style="color:var(--accent); font-family:var(--font-mono);">${r.file}</span></td>
+        <td><span style="color:var(--success); font-weight:700;">● ${r.status}</span></td>
+      </tr>
+    `).join('');
+  }
+
+  const PIPELINE_MODAL_DATA = {
+    main: {
+      title: "main.m (Interactive User Interface & Batch Driver)",
+      file: "main.m",
+      formula: "ah = input(...); n = input(...); TD = input(...);\nresults = run_thermal_buckling_case(...);",
+      desc: "Acquires physical parameters (a/h, power-law index k, porosity, temperature distribution) and drives single or batch thermal buckling simulations."
+    },
+    run_case: {
+      title: "run_thermal_buckling_case.m (FEA Master Solver)",
+      file: "run_thermal_buckling_case.m",
+      formula: "[K_red - λ_cr · KgT_red] · φ = 0\nΔT_cr = λ_cr - T_m · (Φ_const / Φ_slope)",
+      desc: "Coordinates mesh generation, constitutive ABD matrix integration, global matrix assembly, SSSS boundary condensation, ARPACK eigenvalue solving (eigs), and paper reference temperature shift (Eq. 37-40)."
+    },
+    properties: {
+      title: "get_effective_properties.m (Rule of Mixtures with Porosity)",
+      file: "get_effective_properties.m",
+      formula: "E(z) = E_m + (E_c - E_m)·(z/h + 0.5)^k - U_E(z)\nα(z) = α_m + (α_c - α_m)·(z/h + 0.5)^k - U_α(z)",
+      desc: "Evaluates through-thickness effective material properties under power-law gradation with optional Even, Uneven, or SCE porosity reduction penalties."
+    },
+    thermal: {
+      title: "compute_thermal_resultants.m (Thermal Prestress Integrals)",
+      file: "compute_thermal_resultants.m",
+      formula: "Φ₁ = ∫ E(z)·α(z)·ΔT(z) dz\nN₀ = Φ₁ / (1 - ν)",
+      desc: "Computes membrane thermal prestress resultant for Uniform (UTD), Linear (LTD), or 1D steady-state nonlinear conduction (NTD) using 5-point Gauss quadrature."
+    },
+    assemble_k: {
+      title: "assemble_global.m (Global Linear Elastic Stiffness K)",
+      file: "assemble_global.m",
+      formula: "K = ∑ \int [B_m; B_b]ᵀ [A, B; B, D] [B_m; B_b] dA + \int B_sᵀ S B_s dA",
+      desc: "Assembles global structural stiffness matrix under FSDT with 3x3 Gauss integration for membrane/bending and 2x2 reduced Gauss integration for transverse shear (shear locking prevention)."
+    },
+    assemble_kg: {
+      title: "assemble_thermal_geometric.m (Geometric Stiffness K_gT)",
+      file: "assemble_thermal_geometric.m",
+      formula: "K_gT = N₀ · ∑ \int Gᵀ G dA",
+      desc: "Assembles global thermal geometric stiffness matrix representing out-of-plane destabilization under compressive membrane prestress N₀."
+    },
+    bcs: {
+      title: "get_SSSS_BCs.m (Simply-Supported Boundary Constraints)",
+      file: "get_SSSS_BCs.m",
+      formula: "x=0,a: v₀ = 0, w₀ = 0, ψ_y = 0\ny=0,b: u₀ = 0, w₀ = 0, ψ_x = 0",
+      desc: "Enforces classical simply-supported (SSSS) boundary conditions for Mindlin/FSDT plates and condenses stiffness matrices to active free DOFs."
+    },
+    eigs: {
+      title: "eigs (ARPACK Generalized Eigenvalue Solver)",
+      file: "MATLAB built-in eigs",
+      formula: "λ_cr = eigs(K_red, KgT_red, 1, 'sm')",
+      desc: "Extracts smallest positive eigenvalue corresponding to the lowest critical thermal buckling load parameter."
+    },
+    tm_shift: {
+      title: "Ambient Temperature Shift (Javaheri 2002 Eq. 37-40)",
+      file: "run_thermal_buckling_case.m",
+      formula: "ΔT_cr = λ_cr - T_m · (Φ_const / Φ_slope)",
+      desc: "Accounts for non-zero bottom metal reference temperature (e.g. T_m = 5°C in Javaheri Tables 4 & 6) by subtracting the constant ambient pre-strain resultant ratio."
+    }
+  };
+
+  function updateUI() {
+    const h = a_plate / state.ah;
+    const sol = solveAllModes(h, state.k, state.loadCase, state.Tm, state.porosity, state.e0);
+    const crit = sol.critical;
+    const selectedSol = sol.modes.find(m => m.m === state.selectedMode[0] && m.n === state.selectedMode[1]) || crit;
+
+    document.getElementById('badge-k').textContent = state.k.toFixed(1);
+    document.getElementById('badge-ah').textContent = state.ah;
+    document.getElementById('badge-e0').textContent = state.e0.toFixed(2);
+
+    document.getElementById('val-dtcr').innerHTML = `${crit.dt.toFixed(2)} <span style="font-size:0.875rem;color:var(--text-muted);">°C</span>`;
+    document.getElementById('sub-mode').textContent = `Mode (m=${crit.m}, n=${crit.n})`;
+    document.getElementById('val-n0').innerHTML = `${(sol.therm.N0 / 1e3).toFixed(1)} <span style="font-size:0.875rem;color:var(--text-muted);">kN/m</span>`;
+
+    let javVal = '---';
+    if (Math.abs(state.k - 1.0) < 1e-4 && state.porosity === 'none') {
+      let tKey = state.loadCase === 'UTD' ? 'table2' : (state.loadCase === 'LTD' ? 'table4' : 'table6');
+      let tData = PAPER_BENCHMARKS[tKey];
+      if (tData) {
+        let idx = tData.ah.indexOf(state.ah);
+        if (idx !== -1) {
+          javVal = tData.hsdt[idx].toFixed(2) + ' °C';
+        }
+      }
+    }
+    document.getElementById('val-jav').textContent = javVal;
+
+    let femVal = '---';
+    let key = `k${Math.round(state.k)}_ah${state.ah}_${state.loadCase}`;
+    if (state.porosity === 'none' && FEM_REF.lookup && FEM_REF.lookup[key] !== undefined) {
+      femVal = FEM_REF.lookup[key].toFixed(2) + ' °C';
+    }
+    document.getElementById('val-fem').textContent = femVal;
+
+    renderGeometry(h);
+    renderMaterials(h, state.k, state.porosity, state.e0);
+    renderThermal(h, state.k, state.loadCase, state.porosity, state.e0);
+    renderFSDT(sol.abd, crit.psix, crit.al, crit.shearRatio);
+    renderMesh(state.meshN);
+    render3DModeSurface(state.selectedMode[0], state.selectedMode[1]);
+    document.getElementById('lbl-selected-mode').textContent = `(${selectedSol.m},${selectedSol.n})`;
+    renderParametric(crit, selectedSol);
+
+    const tblBody = document.getElementById('tbl-modes-body');
+    if (tblBody) {
+      tblBody.innerHTML = sol.modes.map((m, idx) => `
+        <tr class="${(m.m === state.selectedMode[0] && m.n === state.selectedMode[1]) ? 'highlighted' : ''}" style="cursor:pointer;" data-m="${m.m}" data-n="${m.n}">
+          <td><strong>(${m.m}, ${m.n})</strong> ${idx === 0 ? '★ Crit' : ''}</td>
+          <td>${m.al.toFixed(2)}</td>
+          <td>${m.be.toFixed(2)}</td>
+          <td>${m.lambda.toFixed(2)}</td>
+          <td>${m.dt.toFixed(2)}</td>
+        </tr>
+      `).join('');
+
+      tblBody.querySelectorAll('tr').forEach(tr => {
+        tr.addEventListener('click', () => {
+          let mm = parseInt(tr.getAttribute('data-m'), 10);
+          let nn = parseInt(tr.getAttribute('data-n'), 10);
+          state.selectedMode = [mm, nn];
+          updateUI();
+        });
+      });
+    }
+
+    document.getElementById('lbl-shear-ratio').textContent = crit.shearRatio.toFixed(4);
+  }
+
+  function runSelfTest() {
+    const sol10 = solveNavierMode(1, 1, 1.0/10, 1.0, 'UTD', 0, 'none', 0);
+    const sol20 = solveNavierMode(1, 1, 1.0/20, 1.0, 'UTD', 0, 'none', 0);
+    const sol100 = solveNavierMode(1, 1, 1.0/100, 1.0, 'UTD', 0, 'none', 0);
+
+    const pass10 = Math.abs(sol10.dt - 758.37) < 1.0;
+    const pass20 = Math.abs(sol20.dt - 196.26) < 0.5;
+    const pass100 = Math.abs(sol100.dt - 7.940) < 0.05;
+
+    const pill = document.getElementById('pill-selftest');
+    if (pill) {
+      if (pass10 && pass20 && pass100) {
+        pill.className = 'status-pill pass';
+        pill.innerHTML = `
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          <span>Self-Test: PASSED (10/20/100 -> ${sol10.dt.toFixed(2)} / ${sol20.dt.toFixed(2)} / ${sol100.dt.toFixed(3)})</span>
+        `;
+      } else {
+        pill.className = 'status-pill danger';
+        pill.innerHTML = `<span>Self-Test: FAILED</span>`;
+      }
+    }
+  }
+
+  function initEvents() {
+    const btnTheme = document.getElementById('btn-theme-toggle');
+    btnTheme.addEventListener('click', () => {
+      state.theme = state.theme === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', state.theme);
+      document.getElementById('theme-icon').textContent = state.theme === 'dark' ? '🌙' : '☀️';
+      document.getElementById('theme-text').textContent = state.theme === 'dark' ? 'Dark Mode' : 'Light Mode';
+      updateUI();
+    });
+
+    const btnAudit = document.getElementById('btn-audit-toggle');
+    btnAudit.addEventListener('click', () => {
+      state.auditMode = !state.auditMode;
+      document.body.classList.toggle('audit-mode', state.auditMode);
+      btnAudit.classList.toggle('btn-active', state.auditMode);
+      document.getElementById('audit-text').textContent = state.auditMode ? 'Audit Mode: ON' : 'Audit Mode: OFF';
+    });
+
+    document.getElementById('btn-reset-baseline').addEventListener('click', () => {
+      state.k = 1.0;
+      state.ah = 100;
+      state.porosity = 'none';
+      state.e0 = 0.0;
+      state.loadCase = 'UTD';
+      state.Tm = 0.0;
+      state.selectedMode = [1, 1];
+      syncInputs();
+      updateUI();
+    });
+
+    function bindSlider(sliderId, numId, stateKey, parser) {
+      const s = document.getElementById(sliderId);
+      const n = document.getElementById(numId);
+      if (!s || !n) return;
+      const min = parseFloat(s.min);
+      const max = parseFloat(s.max);
+
+      s.addEventListener('input', () => {
+        let val = Math.max(min, Math.min(max, parser(s.value)));
+        n.value = val;
+        state[stateKey] = val;
+        updateUI();
+      });
+
+      n.addEventListener('input', () => {
+        let val = Math.max(min, Math.min(max, parser(n.value)));
+        s.value = val;
+        n.value = val;
+        state[stateKey] = val;
+        updateUI();
+      });
+    }
+
+    bindSlider('slider-k', 'num-k', 'k', parseFloat);
+    bindSlider('slider-ah', 'num-ah', 'ah', parseInt);
+    bindSlider('slider-e0', 'num-e0', 'e0', parseFloat);
+
+    const selPorosity = document.getElementById('select-porosity');
+    selPorosity.addEventListener('change', () => {
+      state.porosity = selPorosity.value;
+      updateUI();
+    });
+
+    const selLoadCase = document.getElementById('select-loadcase');
+    selLoadCase.addEventListener('change', () => {
+      state.loadCase = selLoadCase.value;
+      if (state.loadCase === 'UTD' && state.Tm === 5.0) {
+        state.Tm = 0.0;
+        document.getElementById('num-tm').value = 0.0;
+      } else if ((state.loadCase === 'LTD' || state.loadCase === 'NTD') && state.Tm === 0.0) {
+        state.Tm = 5.0;
+        document.getElementById('num-tm').value = 5.0;
+      }
+      updateUI();
+    });
+
+    const numTm = document.getElementById('num-tm');
+    numTm.addEventListener('input', () => {
+      state.Tm = parseFloat(numTm.value) || 0.0;
+      updateUI();
+    });
+
+    const selMesh = document.getElementById('select-mesh');
+    selMesh.addEventListener('change', () => {
+      state.meshN = parseInt(selMesh.value, 10);
+      updateUI();
+    });
+
+    document.querySelectorAll('.btn-preset').forEach(btn => {
+      btn.addEventListener('click', () => {
+        state.k = parseFloat(btn.getAttribute('data-k'));
+        state.ah = parseInt(btn.getAttribute('data-ah'), 10);
+        state.loadCase = btn.getAttribute('data-tc');
+        state.Tm = parseFloat(btn.getAttribute('data-tm'));
+        state.porosity = btn.getAttribute('data-p');
+        state.e0 = parseFloat(btn.getAttribute('data-e0'));
+        syncInputs();
+        updateUI();
+      });
+    });
+
+    const tabs = ['ah', 'k', 'e0'];
+    tabs.forEach(t => {
+      const btn = document.getElementById(`tab-study-${t}`);
+      if (btn) {
+        btn.addEventListener('click', () => {
+          tabs.forEach(o => document.getElementById(`tab-study-${o}`).classList.remove('btn-active'));
+          btn.classList.add('btn-active');
+          state.paramTab = t;
+          updateUI();
+        });
+      }
+    });
+
+    const btnLog = document.getElementById('btn-toggle-log');
+    btnLog.addEventListener('click', () => {
+      state.isLogScale = !state.isLogScale;
+      btnLog.classList.toggle('btn-active', state.isLogScale);
+      btnLog.textContent = state.isLogScale ? 'Log Scale: ON' : 'Log Scale: OFF';
+      updateUI();
+    });
+
+    const selTrace = document.getElementById('select-traceability-filter');
+    if (selTrace) {
+      selTrace.addEventListener('change', () => {
+        renderTraceabilityTable(selTrace.value);
+      });
+    }
+
+    const modal = document.getElementById('inspector-modal');
+    const modalClose = document.getElementById('btn-modal-close');
+    modalClose.addEventListener('click', () => modal.classList.remove('active'));
+    modal.addEventListener('click', (e) => { if (e.target === modal) modal.classList.remove('active'); });
+
+    document.querySelectorAll('.pipeline-node').forEach(node => {
+      node.addEventListener('click', () => {
+        let fnKey = node.getAttribute('data-fn');
+        let info = PIPELINE_MODAL_DATA[fnKey];
+        if (info) {
+          document.getElementById('modal-title').textContent = info.title;
+          document.getElementById('modal-file').textContent = 'Source: ' + info.file;
+          document.getElementById('modal-formula').textContent = info.formula;
+          document.getElementById('modal-desc').textContent = info.desc;
+          modal.classList.add('active');
+        }
+      });
+    });
+
+    const canvas3d = document.getElementById('canvas-mode3d');
+    let isDragging = false, lastX = 0, lastY = 0;
+
+    canvas3d.addEventListener('mousedown', (e) => {
+      isDragging = true;
+      lastX = e.clientX;
+      lastY = e.clientY;
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      if (!isDragging) return;
+      let dx = e.clientX - lastX;
+      let dy = e.clientY - lastY;
+      state.rotY += dx * 0.6;
+      state.rotX += dy * 0.6;
+      lastX = e.clientX;
+      lastY = e.clientY;
+      render3DModeSurface(state.selectedMode[0], state.selectedMode[1]);
+    });
+
+    window.addEventListener('mouseup', () => { isDragging = false; });
+  }
+
+  function syncInputs() {
+    document.getElementById('slider-k').value = state.k;
+    document.getElementById('num-k').value = state.k;
+    document.getElementById('slider-ah').value = state.ah;
+    document.getElementById('num-ah').value = state.ah;
+    document.getElementById('slider-e0').value = state.e0;
+    document.getElementById('num-e0').value = state.e0;
+    document.getElementById('select-porosity').value = state.porosity;
+    document.getElementById('select-loadcase').value = state.loadCase;
+    document.getElementById('num-tm').value = state.Tm;
+    document.getElementById('select-mesh').value = state.meshN;
+  }
+
+  window.addEventListener('DOMContentLoaded', () => {
+    initEvents();
+    renderTraceabilityTable('all');
+    runSelfTest();
+    updateUI();
+  });
+
+})();
+
+  </script>
+</body>
+</html>
