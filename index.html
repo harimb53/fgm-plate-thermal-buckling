@@ -1885,7 +1885,6 @@ footer.app-footer {
     const fmt = (value) => Math.abs(value) >= 1000 ? value.toExponential(1) : (Math.abs(value) < 1 ? value.toFixed(2) : value.toFixed(0));
     const xLabel = state.paramTab === 'ah' ? 'Slenderness ratio a/h' : (state.paramTab === 'k' ? 'Power-Law Gradation Index n' : 'Porosity volume fraction e₀');
     const title = state.paramTab === 'ah' ? 'Critical Buckling Temperature vs. a/h' : (state.paramTab === 'k' ? 'Critical Buckling Temperature vs. n' : 'Critical Buckling Temperature vs. e₀');
-    const subtitle = `Mode (${modeM},${modeN}) · a/h = ${state.ah}, n = ${state.k.toFixed(1)}, e₀ = ${state.e0.toFixed(2)}, ${state.loadCase}`;
     const gridX = xTicks.map(x => `<line x1="${mapX(x)}" y1="${padT}" x2="${mapX(x)}" y2="${H - padB}" stroke="${matlab.grid}" stroke-width="1"/>`).join('');
     const gridY = yTicks.map(y => `<line x1="${padL}" y1="${mapY(y)}" x2="${padL + plotW}" y2="${mapY(y)}" stroke="${matlab.grid}" stroke-width="1"/>`).join('');
     const xLabels = xTicks.map(x => `<text x="${mapX(x)}" y="${H - padB + 22}" fill="${matlab.text}" font-size="13" text-anchor="middle">${x}</text>`).join('');
@@ -1895,7 +1894,6 @@ footer.app-footer {
       <rect x="${padL}" y="${padT}" width="${plotW}" height="${plotH}" fill="${matlab.background}" stroke="${matlab.axis}" stroke-width="1.2"/>
       ${gridX}${gridY}${xLabels}${yLabels}
       <text x="${padL + plotW / 2}" y="24" fill="${matlab.text}" font-size="17" font-weight="700" text-anchor="middle">${title}</text>
-      <text x="${padL + plotW / 2}" y="43" fill="${matlab.muted}" font-size="12" text-anchor="middle">${subtitle}</text>
       <text x="${padL + plotW / 2}" y="${H - 18}" fill="${matlab.text}" font-size="14" text-anchor="middle">${xLabel}</text>
       <text x="20" y="${padT + plotH / 2}" fill="${matlab.text}" font-size="14" text-anchor="middle" transform="rotate(-90 20 ${padT + plotH / 2})">Critical temperature difference ΔTcr (°C)</text>
       <path d="${curvePath}" fill="none" stroke="${matlab.blue}" stroke-width="2.5"/>
