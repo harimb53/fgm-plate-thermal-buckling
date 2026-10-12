@@ -909,7 +909,7 @@ footer.app-footer {
         </div>
         <div class="panel-body">
           <div class="canvas-wrapper" style="height: 240px;">
-            <svg id="svg-thermal" class="chart-svg" viewBox="0 0 500 240" preserveAspectRatio="xMidYMid meet" aria-label="Thermal distribution profile g(eta) and thermal resultant integrand" role="img"></svg>
+            <svg id="svg-thermal" class="chart-svg" viewBox="0 0 500 240" preserveAspectRatio="xMidYMid meet" aria-label="Uniform, linear and nonlinear through-thickness thermal distribution profiles" role="img"></svg>
           </div>
         </div>
       </section>
@@ -1551,7 +1551,7 @@ footer.app-footer {
     `;
   }
 
-  function renderThermal(h, k, loadCase, type, e0) {
+  function renderThermal(k) {
     const svg = document.getElementById('svg-thermal');
     if (!svg) return;
 
@@ -1560,25 +1560,18 @@ footer.app-footer {
     const plotW = W - padL - padR;
     const plotH = H - padT - padB;
 
-    let ptsUTD = [], ptsLTD = [], ptsNTD = [], ptsIntegrand = [];
+    let ptsUTD = [], ptsLTD = [], ptsNTD = [];
     const N = 40;
-    let maxIntegrand = 0;
 
     for (let i = 0; i <= N; i++) {
       let eta = i / N;
-      let zi = (eta - 0.5) * h;
       let gU = getThermalG(eta, k, 'UTD');
       let gL = getThermalG(eta, k, 'LTD');
       let gN = getThermalG(eta, k, 'NTD');
-      let p = getMaterialProps(zi, h, k, type, e0);
-      let gCurr = getThermalG(eta, k, loadCase);
-      let integr = p.E * p.alpha * gCurr;
 
       ptsUTD.push({ eta, val: gU });
       ptsLTD.push({ eta, val: gL });
       ptsNTD.push({ eta, val: gN });
-      ptsIntegrand.push({ eta, val: integr });
-      if (integr > maxIntegrand) maxIntegrand = integr;
     }
 
     function mapX(eta) { return padL + eta * plotW; }
@@ -1588,19 +1581,7 @@ footer.app-footer {
     let pathL = 'M ' + ptsLTD.map(p => `${mapX(p.eta)},${mapYG(p.val)}`).join(' L ');
     let pathN = 'M ' + ptsNTD.map(p => `${mapX(p.eta)},${mapYG(p.val)}`).join(' L ');
 
-    let areaPts = ptsIntegrand.map(p => {
-      let norm = maxIntegrand > 0 ? p.val / maxIntegrand : 0;
-      return `${mapX(p.eta)},${padT + (1.0 - norm) * plotH}`;
-    });
-    let areaPath = `M ${mapX(0)},${H - padB} L ` + areaPts.join(' L ') + ` L ${mapX(1)},${H - padB} Z`;
-
     svg.innerHTML = `
-      <defs>
-        <linearGradient id="area-grad" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.35"/>
-          <stop offset="100%" stop-color="#38bdf8" stop-opacity="0.05"/>
-        </linearGradient>
-      </defs>
       <line x1="${padL}" y1="${padT}" x2="${padL}" y2="${H - padB}" stroke="var(--border)" stroke-width="1.5"/>
       <line x1="${padL}" y1="${H - padB}" x2="${padL + plotW}" y2="${H - padB}" stroke="var(--border)" stroke-width="1.5"/>
       <text x="${padL - 8}" y="${mapYG(1.0) + 4}" fill="var(--text-muted)" font-size="10" text-anchor="end">1.0</text>
@@ -1609,7 +1590,6 @@ footer.app-footer {
       <text x="${mapX(0.0)}" y="${H - padB + 16}" fill="var(--text-muted)" font-size="10" text-anchor="middle">η=0 (Metal)</text>
       <text x="${mapX(0.5)}" y="${H - padB + 16}" fill="var(--text-muted)" font-size="10" text-anchor="middle">0.5</text>
       <text x="${mapX(1.0)}" y="${H - padB + 16}" fill="var(--text-muted)" font-size="10" text-anchor="middle">η=1 (Ceramic)</text>
-      <path d="${areaPath}" fill="url(#area-grad)"/>
       <path d="${pathU}" fill="none" stroke="#94a3b8" stroke-width="2" stroke-dasharray="4,4"/>
       <path d="${pathL}" fill="none" stroke="#fbbf24" stroke-width="2" stroke-dasharray="2,2"/>
       <path d="${pathN}" fill="none" stroke="var(--accent)" stroke-width="2.5"/>
@@ -2102,7 +2082,7 @@ footer.app-footer {
 
     renderGeometry(h);
     renderMaterials(h, state.k, state.porosity, state.e0);
-    renderThermal(h, state.k, state.loadCase, state.porosity, state.e0);
+    renderThermal(state.k);
     renderFSDT(sol.abd, crit.psix, crit.al, crit.shearRatio);
     updateMeshDetails(state.meshN);
     render3DModeSurface(state.selectedMode[0], state.selectedMode[1]);
