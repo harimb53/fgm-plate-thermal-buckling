@@ -186,18 +186,14 @@ header.app-header {
   color: var(--accent);
 }
 
-/* Sticky Controls Bar */
+/* Global Controls Bar */
 .controls-bar {
-  position: sticky;
-  top: 0.5rem;
-  z-index: 50;
   background-color: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
   padding: 1rem;
   margin-bottom: 1.5rem;
   box-shadow: var(--shadow-md);
-  backdrop-filter: blur(8px);
 }
 
 .controls-grid {
@@ -211,6 +207,26 @@ header.app-header {
   display: flex;
   flex-direction: column;
   gap: 0.35rem;
+}
+
+.mesh-config-details {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 0.75rem;
+}
+
+.mesh-config-details strong {
+  color: var(--text-main);
+  font-family: var(--font-mono);
+}
+
+.mesh-config-details #lbl-free-dofs {
+  color: var(--accent);
 }
 
 .control-label {
@@ -441,16 +457,10 @@ svg.chart-svg {
 
 /* Let viewBox-driven diagrams grow with their panel instead of clipping at
    the old 240px dashboard height. */
-.canvas-wrapper:has(> svg:not(#svg-mesh)) {
+.canvas-wrapper:has(> svg) {
   height: auto !important;
   min-height: 0;
   aspect-ratio: 500 / 240;
-}
-
-.canvas-wrapper:has(> #svg-mesh) {
-  height: auto !important;
-  min-height: 0;
-  aspect-ratio: 300 / 240;
 }
 
 .canvas-wrapper:has(> svg) > svg {
@@ -461,11 +471,6 @@ svg.chart-svg {
 
 .canvas-wrapper:has(> #canvas-mode3d) {
   height: 260px !important;
-}
-
-.canvas-wrapper:has(> #canvas-sparsity) {
-  height: auto !important;
-  min-height: 220px;
 }
 
 @media (max-width: 700px) {
@@ -779,6 +784,14 @@ footer.app-footer {
             <option value="16">16 × 16 (833 Nodes)</option>
           </select>
         </div>
+
+      </div>
+
+      <div class="mesh-config-details" aria-label="Current Q8 mesh configuration details" aria-live="polite">
+        <div>Total Nodes: <strong id="lbl-total-nodes">225</strong></div>
+        <div>Total DOFs: <strong id="lbl-total-dofs">1125</strong></div>
+        <div>Free DOFs: <strong id="lbl-free-dofs">1005</strong></div>
+        <div>Integration: <strong>3×3 / 2×2 Shear</strong></div>
       </div>
 
       <!-- Quick Preset Buttons -->
@@ -898,10 +911,6 @@ footer.app-footer {
           <div class="canvas-wrapper" style="height: 240px;">
             <svg id="svg-thermal" class="chart-svg" viewBox="0 0 500 240" preserveAspectRatio="xMidYMid meet" aria-label="Thermal distribution profile g(eta) and thermal resultant integrand" role="img"></svg>
           </div>
-          <div style="background: var(--bg-card-subtle); padding: 0.5rem 0.75rem; border-radius: var(--radius-sm); font-size: 0.75rem; display: flex; justify-content: space-between; align-items: center;">
-            <div><strong>Series Error vs Exact Conduction:</strong> <span id="lbl-conduction-err" style="font-family: var(--font-mono); color: var(--accent);">0.00%</span></div>
-            <div style="color: var(--text-muted); font-size: 0.7rem;">6-term paper polynomial expansion</div>
-          </div>
         </div>
       </section>
 
@@ -939,39 +948,11 @@ footer.app-footer {
         </div>
       </section>
 
-      <!-- Panel 5: Q8 FEM View -->
-      <section class="panel-card" aria-labelledby="p5-heading">
-        <div class="panel-header">
-          <h2 class="panel-title" id="p5-heading">
-            <span class="panel-num">5</span>
-            FEM Q8 Serendipity Mesh &amp; Sparsity
-            <span class="audit-tag">generate_mesh.m · assemble_global.m</span>
-          </h2>
-        </div>
-        <div class="panel-body">
-          <div style="display: grid; grid-template-columns: 3fr 2fr; gap: 0.75rem;">
-            <div class="canvas-wrapper" style="height: 240px;">
-              <svg id="svg-mesh" class="chart-svg" viewBox="0 0 300 240" preserveAspectRatio="xMidYMid meet" aria-label="Q8 serendipity element mesh with boundary condition nodes and Gauss integration points" role="img"></svg>
-            </div>
-            <div class="canvas-wrapper" style="height: 240px; display: flex; flex-direction: column; align-items: center; justify-content: center;">
-              <canvas id="canvas-sparsity" width="200" height="200" style="width: 190px; height: 190px;" aria-label="Global stiffness matrix sparsity spy diagram"></canvas>
-              <span style="font-size: 0.65rem; color: var(--text-muted); margin-top: 4px;">K Global Sparsity Pattern</span>
-            </div>
-          </div>
-          <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-muted);">
-            <div>Total Nodes: <strong id="lbl-total-nodes" style="color: var(--text-main);">225</strong></div>
-            <div>Total DOFs: <strong id="lbl-total-dofs" style="color: var(--text-main);">1125</strong></div>
-            <div>Free DOFs: <strong id="lbl-free-dofs" style="color: var(--accent);">1005</strong></div>
-            <div>Integration: <strong>3x3 / 2x2 Shear</strong></div>
-          </div>
-        </div>
-      </section>
-
-      <!-- Panel 6: Modes & 3D Surface -->
-      <section class="panel-card" aria-labelledby="p6-heading">
+      <!-- Panel 5: Modes & 3D Surface -->
+      <section class="panel-card full-width" aria-labelledby="p6-heading">
         <div class="panel-header">
           <h2 class="panel-title" id="p6-heading">
-            <span class="panel-num">6</span>
+            <span class="panel-num">5</span>
             Buckling Modes &amp; 3D Surface Shape
             <span class="audit-tag">Eq. 24 · eigs solver</span>
           </h2>
@@ -1003,11 +984,11 @@ footer.app-footer {
         </div>
       </section>
 
-      <!-- Panel 7: Parametric Sweeps & Benchmarks -->
+      <!-- Panel 6: Parametric Sweeps & Benchmarks -->
       <section class="panel-card full-width" aria-labelledby="p7-heading">
         <div class="panel-header">
           <h2 class="panel-title" id="p7-heading">
-            <span class="panel-num">7</span>
+            <span class="panel-num">6</span>
             Parametric Studies &amp; Benchmark Validation Overlay
             <span class="audit-tag">Tables 2, 4, 6, 8 · fgm_viz_reference.json</span>
           </h2>
@@ -1034,11 +1015,11 @@ footer.app-footer {
         </div>
       </section>
 
-      <!-- Panel 8: Simulation Pipeline -->
+      <!-- Panel 7: Simulation Pipeline -->
       <section class="panel-card full-width" aria-labelledby="p8-heading">
         <div class="panel-header">
           <h2 class="panel-title" id="p8-heading">
-            <span class="panel-num">8</span>
+            <span class="panel-num">7</span>
             FEA Code Architecture &amp; Mathematical Execution Pipeline
             <span class="audit-tag">main.m -> run_thermal_buckling_case.m</span>
           </h2>
@@ -1100,11 +1081,11 @@ footer.app-footer {
         </div>
       </section>
 
-      <!-- Panel 9: Audit Mode & Traceability Matrix -->
+      <!-- Panel 8: Audit Mode & Traceability Matrix -->
       <section class="panel-card full-width" aria-labelledby="p9-heading">
         <div class="panel-header">
           <h2 class="panel-title" id="p9-heading">
-            <span class="panel-num">9</span>
+            <span class="panel-num">8</span>
             Equation Traceability &amp; Verification Matrix
             <span class="audit-tag">Javaheri (2002) Traceability</span>
           </h2>
@@ -1353,32 +1334,6 @@ footer.app-footer {
     }
     let N0 = phi_slope / (1.0 - nu);
     return { phi_slope, phi_const, N0 };
-  }
-
-  function computeExactConduction(k) {
-    const N = 100;
-    let etaArr = [];
-    let kInvArr = [];
-    for (let i = 0; i <= N; i++) {
-      let eta = i / N;
-      let K_val = Km + (Kc - Km) * Math.pow(eta, k);
-      etaArr.push(eta);
-      kInvArr.push(1.0 / K_val);
-    }
-    let cumInt = [0];
-    for (let i = 1; i <= N; i++) {
-      let step = (etaArr[i] - etaArr[i - 1]) * 0.5 * (kInvArr[i] + kInvArr[i - 1]);
-      cumInt.push(cumInt[i - 1] + step);
-    }
-    let totalInt = cumInt[N];
-    let maxErr = 0;
-    for (let i = 0; i <= N; i++) {
-      let exact = totalInt > 0 ? cumInt[i] / totalInt : etaArr[i];
-      let series = getThermalG(etaArr[i], k, 'NTD');
-      let err = Math.abs(series - exact);
-      if (err > maxErr) maxErr = err;
-    }
-    return maxErr;
   }
 
   function solveNavierMode(m, n, h, k, loadCase, Tm, type, e0, abd, therm) {
@@ -1646,9 +1601,6 @@ footer.app-footer {
     });
     let areaPath = `M ${mapX(0)},${H - padB} L ` + areaPts.join(' L ') + ` L ${mapX(1)},${H - padB} Z`;
 
-    const err = computeExactConduction(k);
-    document.getElementById('lbl-conduction-err').textContent = (err * 100).toFixed(3) + '% max error';
-
     svg.innerHTML = `
       <defs>
         <linearGradient id="area-grad" x1="0" y1="0" x2="0" y2="1">
@@ -1714,89 +1666,14 @@ footer.app-footer {
     `;
   }
 
-  function renderMesh(meshN) {
-    const svg = document.getElementById('svg-mesh');
-    if (!svg) return;
+  function updateMeshDetails(meshN) {
+    const totalNodes = (2 * meshN + 1) * (2 * meshN + 1) - meshN * meshN;
+    const totalDofs = totalNodes * 5;
+    const fixedDofs = (2 * (2 * meshN + 1) + 2 * (2 * meshN - 1)) * 3;
 
-    const nx = meshN, ny = meshN;
-    const num_nodes = (2 * nx + 1) * (2 * ny + 1) - nx * ny;
-    const total_dofs = num_nodes * 5;
-    const fixed_dofs = (2 * (2 * nx + 1) + 2 * (2 * ny - 1)) * 3;
-    const free_dofs = total_dofs - fixed_dofs;
-
-    document.getElementById('lbl-total-nodes').textContent = num_nodes;
-    document.getElementById('lbl-total-dofs').textContent = total_dofs;
-    document.getElementById('lbl-free-dofs').textContent = free_dofs;
-
-    const W = 300, H = 240;
-    const pad = 25;
-    const spanX = (W - 2 * pad) / nx;
-    const spanY = (H - 2 * pad) / ny;
-
-    let rects = [];
-    for (let j = 0; j < ny; j++) {
-      for (let i = 0; i < nx; i++) {
-        let x = pad + i * spanX;
-        let y = pad + (ny - 1 - j) * spanY;
-        rects.push(`<rect x="${x}" y="${y}" width="${spanX}" height="${spanY}" fill="var(--bg-card)" stroke="var(--border)" stroke-width="1"/>`);
-        if (nx <= 8) {
-          rects.push(`<circle cx="${x + spanX*0.35}" cy="${y + spanY*0.35}" r="1.5" fill="#f43f5e" opacity="0.6"/>`);
-          rects.push(`<circle cx="${x + spanX*0.65}" cy="${y + spanY*0.35}" r="1.5" fill="#f43f5e" opacity="0.6"/>`);
-          rects.push(`<circle cx="${x + spanX*0.35}" cy="${y + spanY*0.65}" r="1.5" fill="#f43f5e" opacity="0.6"/>`);
-          rects.push(`<circle cx="${x + spanX*0.65}" cy="${y + spanY*0.65}" r="1.5" fill="#f43f5e" opacity="0.6"/>`);
-        }
-      }
-    }
-
-    let nodesSVG = [];
-    const stepX = spanX / 2;
-    const stepY = spanY / 2;
-
-    for (let r = 0; r <= 2 * ny; r++) {
-      for (let c = 0; c <= 2 * nx; c++) {
-        if (r % 2 === 1 && c % 2 === 1) continue;
-        let x = pad + c * stepX;
-        let y = pad + (2 * ny - r) * stepY;
-        let isXEdge = (c === 0 || c === 2 * nx);
-        let isYEdge = (r === 0 || r === 2 * ny);
-
-        if (isXEdge || isYEdge) {
-          let col = (isXEdge && isYEdge) ? '#a855f7' : (isXEdge ? '#10b981' : '#38bdf8');
-          nodesSVG.push(`<circle cx="${x}" cy="${y}" r="2.5" fill="${col}"/>`);
-        }
-      }
-    }
-
-    svg.innerHTML = `
-      ${rects.join('')}
-      ${nodesSVG.join('')}
-      <text x="${W/2}" y="${H - 6}" fill="var(--text-muted)" font-size="9" text-anchor="middle">
-        Q8 Mesh: ${nx}×${ny} Elements · SSSS Perimeter Constrained
-      </text>
-    `;
-
-    renderSparsity(meshN);
-  }
-
-  function renderSparsity(meshN) {
-    const canvas = document.getElementById('canvas-sparsity');
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    const S = canvas.width;
-    ctx.clearRect(0, 0, S, S);
-    ctx.fillStyle = '#0f172a';
-    ctx.fillRect(0, 0, S, S);
-
-    const num_blocks = meshN * 2;
-    const bw = S / num_blocks;
-
-    for (let i = 0; i < num_blocks; i++) {
-      for (let j = Math.max(0, i - 2); j <= Math.min(num_blocks - 1, i + 2); j++) {
-        let alpha = 1.0 - Math.abs(i - j) * 0.25;
-        ctx.fillStyle = `rgba(56, 189, 248, ${alpha})`;
-        ctx.fillRect(j * bw + 1, i * bw + 1, bw - 2, bw - 2);
-      }
-    }
+    document.getElementById('lbl-total-nodes').textContent = totalNodes;
+    document.getElementById('lbl-total-dofs').textContent = totalDofs;
+    document.getElementById('lbl-free-dofs').textContent = totalDofs - fixedDofs;
   }
 
   function render3DModeSurface(m, n) {
@@ -2234,7 +2111,7 @@ footer.app-footer {
     renderMaterials(h, state.k, state.porosity, state.e0);
     renderThermal(h, state.k, state.loadCase, state.porosity, state.e0);
     renderFSDT(sol.abd, crit.psix, crit.al, crit.shearRatio);
-    renderMesh(state.meshN);
+    updateMeshDetails(state.meshN);
     render3DModeSurface(state.selectedMode[0], state.selectedMode[1]);
     document.getElementById('lbl-selected-mode').textContent = `(${selectedSol.m},${selectedSol.n})`;
     renderParametric(crit, selectedSol);
@@ -2373,7 +2250,7 @@ footer.app-footer {
     const selMesh = document.getElementById('select-mesh');
     selMesh.addEventListener('change', () => {
       state.meshN = parseInt(selMesh.value, 10);
-      updateUI();
+      updateMeshDetails(state.meshN);
     });
 
     document.querySelectorAll('.btn-preset').forEach(btn => {
